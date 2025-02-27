@@ -2,13 +2,15 @@
 
 import { UNISWAP_SWAP_ROUTER_ABI } from '@/abi/uniswapV3';
 import { chatService } from '@/api/chat';
-import { UNISWAP_SWAP_ROUTER_ADDRESS } from '@/constants/contracts';
+import { DEXON_ADDRESS, UNISWAP_SWAP_ROUTER_ADDRESS } from '@/constants/contracts';
+import { DEXON_TYPED_DATA, OrderTypes } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
 import { readContract, writeContract } from '@wagmi/core';
 import { useState } from 'react';
-import { erc20Abi, parseUnits } from 'viem';
-import { useAccount, useConfig, usePublicClient } from 'wagmi';
+import { type Hex, erc20Abi, maxUint256, parseUnits } from 'viem';
+import { monadTestnet } from 'viem/chains';
+import { useAccount, useConfig, usePublicClient, useSignTypedData } from 'wagmi';
 import { ChatArea } from './components/ChatArea';
 import { InputArea } from './components/InputArea';
 
@@ -21,6 +23,8 @@ export const MainContent = () => {
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const config = useConfig();
+  const { signTypedDataAsync } = useSignTypedData();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -108,26 +112,42 @@ export const MainContent = () => {
   };
 
   const handleParseOrder = async (order: OrderDetails) => {
-    if (order.trigger_condition === '=') {
-      const token = Tokens[order.token_name.toUpperCase() as TokenKey];
-      if (!token) {
-        throw new Error('Token not found');
-      }
-
-      const tokenIn = order.order_side === 'buy' ? Tokens.USDC : token;
-      const tokenOut = order.order_side === 'buy' ? token : Tokens.USDC;
-      const amountIn = order.amount;
-      await handleSwap(tokenIn, tokenOut, amountIn);
-    } else {
-    }
-  };
-
-  const handleSwap = async (tokenIn: Token, tokenOut: Token, amountIn: string) => {
     if (!address) {
       throw new Error('Please connect wallet');
     }
 
-    if (chainId !== 10143) {
+    const token = Tokens[order.token_name.toUpperCase() as TokenKey];
+    if (!token) {
+      throw new Error('Token not found');
+    }
+
+    const tokenIn = order.order_side === 'buy' ? Tokens.USDC : token;
+    const tokenOut = order.order_side === 'buy' ? token : Tokens.USDC;
+    const amountIn = parseUnits(order.amount, tokenIn.decimals);
+    const path = findPaths(tokenIn.address, tokenOut.address);
+
+    if (order.trigger_condition === '=') {
+      await handleSwap(address, tokenIn, tokenOut, path, amountIn);
+    } else {
+      // TODO: fetch current price and compare
+      const currentPrice = parseUnits('2500', 18);
+      const triggerPrice = parseUnits(order.trigger_price, 18);
+      let orderType: number;
+      if (
+        (order.order_side === 'buy' && triggerPrice < currentPrice) ||
+        (order.order_side === 'sell' && triggerPrice > currentPrice)
+      ) {
+        orderType = OrderTypes.LIMIT;
+      } else {
+        orderType = OrderTypes.STOP;
+      }
+      const orderSide = order.order_side === 'buy' ? 0 : 1;
+      await handlePlaceOrder(address, path, amountIn, triggerPrice, orderType, orderSide);
+    }
+  };
+
+  const handleSwap = async (account: Hex, tokenIn: Token, tokenOut: Token, path: Hex, amountIn: bigint) => {
+    if (chainId !== monadTestnet.id) {
       throw new Error('Unsupported chain');
     }
 
@@ -135,16 +155,15 @@ export const MainContent = () => {
       abi: erc20Abi,
       address: tokenIn.address,
       functionName: 'allowance',
-      args: [address, UNISWAP_SWAP_ROUTER_ADDRESS]
+      args: [account, UNISWAP_SWAP_ROUTER_ADDRESS]
     });
 
-    const rawAmountIn = parseUnits(amountIn, tokenIn.decimals);
-    if (rawAmountIn > allowance) {
+    if (amountIn > allowance) {
       const approveTx = await writeContract(config, {
         address: tokenIn.address,
         abi: erc20Abi,
         functionName: 'approve',
-        args: [UNISWAP_SWAP_ROUTER_ADDRESS, rawAmountIn]
+        args: [UNISWAP_SWAP_ROUTER_ADDRESS, amountIn]
       });
       await publicClient?.waitForTransactionReceipt({
         hash: approveTx
@@ -158,10 +177,10 @@ export const MainContent = () => {
       functionName: 'exactInput',
       args: [
         {
-          amountIn: rawAmountIn,
-          recipient: address,
+          amountIn: amountIn,
+          recipient: account,
           amountOutMinimum: BigInt(0),
-          path: findPaths(tokenIn.address, tokenOut.address)
+          path: path
         }
       ]
     });
@@ -176,6 +195,43 @@ export const MainContent = () => {
         isUser: false
       }
     ]);
+  };
+
+  const handlePlaceOrder = async (
+    account: Hex,
+    path: Hex,
+    amountIn: bigint,
+    triggerPrice: bigint,
+    orderType: number,
+    orderSide: number
+  ) => {
+    const nonce = BigInt(new Date().getTime());
+    const slippage = BigInt(10000); // TODO get from user input, hardcoded 1%
+    const deadline = maxUint256; // TODO get from user input
+
+    if (!publicClient) {
+      throw new Error('Public client not found');
+    }
+    const { domain } = await publicClient.getEip712Domain({
+      address: DEXON_ADDRESS
+    });
+    const order = {
+      account,
+      nonce,
+      path,
+      amount: amountIn,
+      triggerPrice,
+      slippage,
+      orderType,
+      orderSide,
+      deadline
+    };
+    const signature = await signTypedDataAsync({
+      domain,
+      types: DEXON_TYPED_DATA.Order.types,
+      primaryType: DEXON_TYPED_DATA.Order.primaryType,
+      message: order
+    });
   };
 
   return (

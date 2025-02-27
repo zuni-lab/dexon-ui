@@ -1,4 +1,7 @@
+import { ProjectENV } from '@env';
 import { Tokens } from './tokens';
+
+export const DEXON_ADDRESS = ProjectENV.NEXT_PUBLIC_DEXON_CONTRACT as `0x${string}`;
 
 export const UNISWAP_SWAP_ROUTER_ADDRESS = '0x4c4eabd5fb1d1a7234a48692551eaecff8194ca7';
 

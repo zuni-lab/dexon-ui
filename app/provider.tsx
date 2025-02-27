@@ -1,29 +1,13 @@
 'use client';
 
+import { ProjectENV } from '@env';
 import { RainbowKitProvider, darkTheme, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { http, WagmiProvider } from 'wagmi';
-import '@rainbow-me/rainbowkit/styles.css';
-import { ProjectENV } from '@env';
 import React from 'react';
-import { defineChain } from 'viem';
-
-export const monadTestnet = defineChain({
-  id: 10143,
-  name: 'monadTestnet',
-  nativeCurrency: {
-    name: 'MON',
-    symbol: 'MON',
-    decimals: 18
-  },
-  rpcUrls: {
-    default: {
-      http: [ProjectENV.NEXT_PUBLIC_MONAD_TESTNET_RPC_URL]
-    }
-  },
-  testnet: true
-});
+import { monadTestnet } from 'viem/chains';
+import { http, WagmiProvider } from 'wagmi';
 
 const Providers = ({ children }: React.PropsWithChildren) => {
   const [client] = React.useState(new QueryClient({ defaultOptions: { queries: { staleTime: 5000 } } }));

@@ -7,7 +7,7 @@ import { DEXON_TYPED_DATA, OrderTypes } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
 import { readContract, writeContract } from '@wagmi/core';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { type Hex, erc20Abi, maxUint256, parseUnits } from 'viem';
 import { monadTestnet } from 'viem/chains';
 import { useAccount, useConfig, usePublicClient, useSignTypedData } from 'wagmi';
@@ -111,128 +111,144 @@ export const MainContent = () => {
     }
   };
 
-  const handleParseOrder = async (order: OrderDetails) => {
-    if (!address) {
-      throw new Error('Please connect wallet');
-    }
-
-    const token = Tokens[order.token_name.toUpperCase() as TokenKey];
-    if (!token) {
-      throw new Error('Token not found');
-    }
-
-    const tokenIn = order.order_side === 'buy' ? Tokens.USDC : token;
-    const tokenOut = order.order_side === 'buy' ? token : Tokens.USDC;
-    const amountIn = parseUnits(order.amount, tokenIn.decimals);
-    const path = findPaths(tokenIn.address, tokenOut.address);
-
-    if (order.trigger_condition === '=') {
-      await handleSwap(address, tokenIn, tokenOut, path, amountIn);
-    } else {
-      // TODO: fetch current price and compare
-      const currentPrice = parseUnits('2500', 18);
-      const triggerPrice = parseUnits(order.trigger_price, 18);
-      let orderType: number;
-      if (
-        (order.order_side === 'buy' && triggerPrice < currentPrice) ||
-        (order.order_side === 'sell' && triggerPrice > currentPrice)
-      ) {
-        orderType = OrderTypes.LIMIT;
-      } else {
-        orderType = OrderTypes.STOP;
+  const handleParseOrder = useCallback(
+    async (order: OrderDetails) => {
+      if (!address) {
+        throw new Error('Please connect wallet');
       }
-      const orderSide = order.order_side === 'buy' ? 0 : 1;
-      await handlePlaceOrder(address, path, amountIn, triggerPrice, orderType, orderSide);
-    }
-  };
 
-  const handleSwap = async (account: Hex, tokenIn: Token, tokenOut: Token, path: Hex, amountIn: bigint) => {
-    if (chainId !== monadTestnet.id) {
-      throw new Error('Unsupported chain');
-    }
+      const token = Tokens[order.token_name.toUpperCase() as TokenKey];
+      if (!token) {
+        throw new Error('Token not found');
+      }
 
-    const allowance = await readContract(config, {
-      abi: erc20Abi,
-      address: tokenIn.address,
-      functionName: 'allowance',
-      args: [account, UNISWAP_SWAP_ROUTER_ADDRESS]
-    });
+      const tokenIn = order.order_side === 'buy' ? Tokens.USDC : token;
+      const tokenOut = order.order_side === 'buy' ? token : Tokens.USDC;
+      const amount = parseUnits(order.amount, tokenIn.decimals);
+      const path = findPaths(tokenIn.address, tokenOut.address);
 
-    if (amountIn > allowance) {
-      const approveTx = await writeContract(config, {
-        address: tokenIn.address,
+      const allowance = await readContract(config, {
         abi: erc20Abi,
-        functionName: 'approve',
-        args: [UNISWAP_SWAP_ROUTER_ADDRESS, amountIn]
+        address: tokenIn.address,
+        functionName: 'allowance',
+        args: [address, UNISWAP_SWAP_ROUTER_ADDRESS]
+      });
+      if (amount > allowance) {
+        const approveTx = await writeContract(config, {
+          address: tokenIn.address,
+          abi: erc20Abi,
+          functionName: 'approve',
+          args: [UNISWAP_SWAP_ROUTER_ADDRESS, amount]
+        });
+        await publicClient?.waitForTransactionReceipt({
+          hash: approveTx
+        });
+      }
+
+      if (order.trigger_condition === '=') {
+        await handleSwap(address, tokenIn, tokenOut, path, amount);
+      } else {
+        // TODO: fetch current price and compare
+        const currentPrice = parseUnits('2500', 18);
+        const triggerPrice = parseUnits(order.trigger_price, 18);
+        let orderType: number;
+        if (
+          (order.order_side === 'buy' && triggerPrice < currentPrice) ||
+          (order.order_side === 'sell' && triggerPrice > currentPrice)
+        ) {
+          orderType = OrderTypes.LIMIT;
+        } else {
+          orderType = OrderTypes.STOP;
+        }
+        const orderSide = order.order_side === 'buy' ? 0 : 1;
+        await handlePlaceOrder(address, path, amount, triggerPrice, orderType, orderSide);
+      }
+    },
+    [address, config, publicClient]
+  );
+
+  const handleSwap = useCallback(
+    async (account: Hex, tokenIn: Token, tokenOut: Token, path: Hex, amountIn: bigint) => {
+      if (chainId !== monadTestnet.id) {
+        throw new Error('Unsupported chain');
+      }
+
+      // swap logic
+      const swapTx = await writeContract(config, {
+        address: UNISWAP_SWAP_ROUTER_ADDRESS,
+        abi: UNISWAP_SWAP_ROUTER_ABI,
+        functionName: 'exactInput',
+        args: [
+          {
+            amountIn: amountIn,
+            recipient: account,
+            amountOutMinimum: BigInt(0),
+            path: path
+          }
+        ]
       });
       await publicClient?.waitForTransactionReceipt({
-        hash: approveTx
+        hash: swapTx
       });
-    }
 
-    // swap logic
-    const swapTx = await writeContract(config, {
-      address: UNISWAP_SWAP_ROUTER_ADDRESS,
-      abi: UNISWAP_SWAP_ROUTER_ABI,
-      functionName: 'exactInput',
-      args: [
+      setMessages((prev) => [
+        ...prev,
         {
-          amountIn: amountIn,
-          recipient: account,
-          amountOutMinimum: BigInt(0),
-          path: path
+          text: `Swapped ${amountIn} ${tokenIn.symbol} for ${tokenOut.symbol}`,
+          isUser: false
         }
-      ]
-    });
-    await publicClient?.waitForTransactionReceipt({
-      hash: swapTx
-    });
+      ]);
+    },
+    [chainId, config, publicClient]
+  );
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        text: `Swapped ${amountIn} ${tokenIn.symbol} for ${tokenOut.symbol}`,
-        isUser: false
+  const handlePlaceOrder = useCallback(
+    async (
+      account: Hex,
+      path: Hex,
+      amountIn: bigint,
+      triggerPrice: bigint,
+      orderType: number,
+      orderSide: number
+    ) => {
+      const nonce = BigInt(new Date().getTime());
+      const slippage = BigInt(10000); // TODO get from user input, hardcoded 1%
+      const deadline = maxUint256; // TODO get from user input
+
+      if (!publicClient) {
+        throw new Error('Public client not found');
       }
-    ]);
-  };
+      const { domain } = await publicClient.getEip712Domain({
+        address: DEXON_ADDRESS
+      });
+      const order = {
+        account,
+        nonce,
+        path,
+        amount: amountIn,
+        triggerPrice,
+        slippage,
+        orderType,
+        orderSide,
+        deadline
+      };
+      const signature = await signTypedDataAsync({
+        domain,
+        types: DEXON_TYPED_DATA.Order.types,
+        primaryType: DEXON_TYPED_DATA.Order.primaryType,
+        message: order
+      });
 
-  const handlePlaceOrder = async (
-    account: Hex,
-    path: Hex,
-    amountIn: bigint,
-    triggerPrice: bigint,
-    orderType: number,
-    orderSide: number
-  ) => {
-    const nonce = BigInt(new Date().getTime());
-    const slippage = BigInt(10000); // TODO get from user input, hardcoded 1%
-    const deadline = maxUint256; // TODO get from user input
-
-    if (!publicClient) {
-      throw new Error('Public client not found');
-    }
-    const { domain } = await publicClient.getEip712Domain({
-      address: DEXON_ADDRESS
-    });
-    const order = {
-      account,
-      nonce,
-      path,
-      amount: amountIn,
-      triggerPrice,
-      slippage,
-      orderType,
-      orderSide,
-      deadline
-    };
-    const signature = await signTypedDataAsync({
-      domain,
-      types: DEXON_TYPED_DATA.Order.types,
-      primaryType: DEXON_TYPED_DATA.Order.primaryType,
-      message: order
-    });
-  };
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: 'Placed order successfully',
+          isUser: false
+        }
+      ]);
+    },
+    [publicClient, signTypedDataAsync]
+  );
 
   return (
     <div className='flex-1 flex flex-col'>

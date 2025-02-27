@@ -22,11 +22,12 @@ interface ChatAreaProps {
 export const ChatMessage: IComponent<ChatMessageProps> = ({ message, onParseOrder }) => {
   const orderDetails = !message.isUser ? parseOrderDetails(message.text) : null;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: JSON.stringify is used to compare deep equality
   useEffect(() => {
     if (orderDetails) {
       onParseOrder(orderDetails);
     }
-  }, [orderDetails, onParseOrder]);
+  }, [JSON.stringify(orderDetails), onParseOrder]);
 
   return (
     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>

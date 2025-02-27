@@ -15,7 +15,7 @@ const Providers = ({ children }: React.PropsWithChildren) => {
   const config = React.useMemo(
     () =>
       getDefaultConfig({
-        appName: 'My RainbowKit App',
+        appName: 'Dexon',
         projectId: ProjectENV.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
         chains: [monadTestnet],
         ssr: true,

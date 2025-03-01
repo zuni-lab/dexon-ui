@@ -17,47 +17,6 @@ input:focus {
   }
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 7.84%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 221 90% 59%;
-    --primary-foreground: 255 100% 100%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 0 0% 13%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --radius: 0.5rem;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background  text-foreground;
-  }
-}
 
 .glass {
   -webkit-backdrop-filter: blur(22.5px);
@@ -85,37 +44,4 @@ input:focus {
   background-color: #888;
   border-radius: 10px;
   border: 2px solid #e0e0e0;
-}
-
-section,
-.section {
-  @apply max-w-6xl min-h-[48vh] mx-auto py-16;
-}
-
-h1.title {
-  @apply text-4xl font-semibold py-2;
-}
-
-h2.subtitle {
-  @apply text-2xl font-semibold py-2;
-}
-
-.statItem .value {
-  text-shadow:
-    2px 0 #3874f5,
-    -2px 0 #3874f5,
-    0 2px #3874f5,
-    0 -2px #3874f5,
-    1px 1px #3874f5,
-    -1px -1px #3874f5,
-    1px -1px #3874f5,
-    -1px 1px #3874f5;
-  color: black;
-  font-size: 7.5rem;
-  align-items: center;
-  font-weight: 600;
-}
-
-hr {
-  @apply border-t border-gray-500 my-8;
 }

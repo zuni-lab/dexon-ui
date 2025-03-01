@@ -1,16 +1,19 @@
+'use client';
+
 import { Button } from '@/components/shadcn/Button';
 import { Input } from '@/components/shadcn/Input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shadcn/Tabs';
+import { cn } from '@/utils/shadcn';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import BuySellToggle from './BuySellToggle';
 import TradingPriceHeader from './TradingPriceHeader';
 
-export default function TradingPanel() {
+export const TradingPanel: IComponent<{ className?: string }> = ({ className }) => {
   const [tradeType, setTradeType] = useState('buy');
 
   return (
-    <div className='bg-[#251D46] rounded-xl p-4'>
+    <div className={cn('bg-[#251D46] rounded-xl p-4', className)}>
       <TradingPriceHeader />
 
       {/* Trading Type Tabs */}
@@ -80,4 +83,4 @@ export default function TradingPanel() {
       </Tabs>
     </div>
   );
-}
+};

@@ -129,7 +129,11 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
         triggerPrice={triggerPrice}
         setTriggerPrice={setTriggerPrice}
       />
-      <StableCoinSection orderSide={orderSide} usdcBalance={usdcBalance} usdcAmount={usdcAmount} />
+      <StableCoinSection
+        orderSide={orderSide}
+        usdcBalance={usdcBalance}
+        usdcAmount={(Number(amount) * Number(triggerPrice)).toString()}
+      />
     </BaseOrder>
   );
 };

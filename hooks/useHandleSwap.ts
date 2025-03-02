@@ -5,11 +5,12 @@ import { UNISWAP_SWAP_ROUTER_ADDRESS } from '@/constants/contracts';
 import { OrderSide } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
-import { readContract, writeContract } from '@wagmi/core';
+import { writeContract } from '@wagmi/core';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import { erc20Abi, maxUint256, parseUnits } from 'viem';
+import { maxUint256, parseUnits } from 'viem';
 import { useAccount, useConfig, usePublicClient } from 'wagmi';
+import { useApproveToken } from './useApproveToken';
 
 interface UseHandleSwapProps {
   amount: string;
@@ -30,6 +31,7 @@ export const useHandleSwap = ({
   const { address } = useAccount();
   const config = useConfig();
   const publicClient = usePublicClient();
+  const { approveToken } = useApproveToken();
 
   const handleSwap = useCallback(async () => {
     if (!address || !publicClient) {
@@ -46,47 +48,21 @@ export const useHandleSwap = ({
       setIsPending(true);
 
       // Check and handle token approvals
-      let approveTx: `0x${string}` | undefined;
       if (orderSide === OrderSide.BUY) {
-        const allowance = await readContract(config, {
-          abi: erc20Abi,
-          address: Tokens.USDC.address,
-          functionName: 'allowance',
-          args: [address, UNISWAP_SWAP_ROUTER_ADDRESS]
+        const maxUsdcAmount = (Number(usdcAmount) * 1.1).toString();
+        const useAmount = parseUnits(maxUsdcAmount, Tokens.USDC.decimals);
+        await approveToken({
+          token: Tokens.USDC.address,
+          spender: UNISWAP_SWAP_ROUTER_ADDRESS,
+          amount: useAmount
         });
-        const useAmount = parseUnits(usdcAmount, Tokens.USDC.decimals);
-        if (allowance < (useAmount * BigInt(110)) / BigInt(100)) {
-          approveTx = await writeContract(config, {
-            abi: erc20Abi,
-            address: Tokens.USDC.address,
-            functionName: 'approve',
-            args: [UNISWAP_SWAP_ROUTER_ADDRESS, maxUint256]
-          });
-        }
       } else {
-        const allowance = await readContract(config, {
-          abi: erc20Abi,
-          address: selectedToken.address,
-          functionName: 'allowance',
-          args: [address, UNISWAP_SWAP_ROUTER_ADDRESS]
-        });
         const useAmount = parseUnits(amount, selectedToken.decimals);
-        if (allowance < useAmount) {
-          approveTx = await writeContract(config, {
-            abi: erc20Abi,
-            address: selectedToken.address,
-            functionName: 'approve',
-            args: [UNISWAP_SWAP_ROUTER_ADDRESS, maxUint256]
-          });
-        }
-      }
-
-      // Wait for approval transaction if needed
-      if (approveTx) {
-        await publicClient.waitForTransactionReceipt({
-          hash: approveTx
+        await approveToken({
+          token: selectedToken.address,
+          spender: UNISWAP_SWAP_ROUTER_ADDRESS,
+          amount: useAmount
         });
-        toast.success('Token approval confirmed');
       }
 
       // Execute swap
@@ -138,7 +114,7 @@ export const useHandleSwap = ({
       toast.error('Failed to execute swap');
       setIsPending(false);
     }
-  }, [address, amount, config, orderSide, publicClient, selectedToken, usdcAmount, callback]);
+  }, [address, amount, approveToken, config, orderSide, publicClient, selectedToken, usdcAmount, callback]);
 
   return {
     handleSwap,

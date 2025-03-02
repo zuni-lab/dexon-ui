@@ -38,6 +38,15 @@ export const Health = () => {
   );
 };
 
+const EXAMPLE_COMMANDS = [
+  'Buy 1 ETH at market price',
+  'Place a limit order to buy 2 ETH when price is below $2000',
+  'Set a stop loss to sell 0.5 ETH if price drops below $2200',
+  "What's my current ETH balance?",
+  'Show my active orders',
+  'Cancel all pending orders'
+];
+
 export const MainContent = () => {
   const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);
   const [input, setInput] = useState('');
@@ -273,6 +282,10 @@ export const MainContent = () => {
     },
     [publicClient, signTypedDataAsync]
   );
+
+  const handleExampleClick = (command: string) => {
+    setInput(command);
+  };
 
   return (
     <div className='flex-1 flex flex-col'>

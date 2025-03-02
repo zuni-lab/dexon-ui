@@ -1,28 +1,36 @@
 import { Button } from '@/components/shadcn/Button';
-import { FileQuestion, LogOut, MessageSquare, MessageSquarePlus, Sun, User } from 'lucide-react';
+import {
+  AlertOctagon,
+  ArrowRightLeft,
+  FileQuestion,
+  LineChart,
+  LogOut,
+  MessageSquare,
+  MessageSquarePlus,
+  Settings,
+  Sun,
+  User,
+  Wallet
+} from 'lucide-react';
 
 const CHAT_HISTORY_ITEMS = [
-  { title: 'AI Chat Tool Ethics' },
-  { title: 'AI Chat Tool Impact Writing' },
-  { title: 'New chat' }
+  { title: 'Market Orders', icon: <LineChart className='mr-2 h-4 w-4' /> },
+  { title: 'Limit Orders', icon: <ArrowRightLeft className='mr-2 h-4 w-4' /> },
+  { title: 'Stop Orders', icon: <AlertOctagon className='mr-2 h-4 w-4' /> }
 ];
 
 const FOOTER_ITEMS = [
   {
-    icon: <Sun className='mr-2 h-4 w-4 group-hover:text-indigo-400' />,
-    label: 'Light mode'
+    icon: <Wallet className='mr-2 h-4 w-4 group-hover:text-purple4' />,
+    label: 'Connect Wallet'
   },
   {
-    icon: <User className='mr-2 h-4 w-4 group-hover:text-indigo-400' />,
-    label: 'My account'
+    icon: <Settings className='mr-2 h-4 w-4 group-hover:text-purple4' />,
+    label: 'Trading Settings'
   },
   {
-    icon: <FileQuestion className='mr-2 h-4 w-4 group-hover:text-indigo-400' />,
-    label: 'Updates & FAQ'
-  },
-  {
-    icon: <LogOut className='mr-2 h-4 w-4 group-hover:text-indigo-400' />,
-    label: 'Log out'
+    icon: <FileQuestion className='mr-2 h-4 w-4 group-hover:text-purple4' />,
+    label: 'Trading Guide'
   }
 ];
 

@@ -13,23 +13,25 @@ const TabButton: IComponent<{ value: OrderType; label: string }> = ({ value, lab
   );
 };
 
+const OrderContent: IComponent<{ value: OrderType }> = ({ value }) => {
+  return (
+    <TabsContent value={value} className='grow'>
+      <OrderWrapper type={value} />
+    </TabsContent>
+  );
+};
+
 export const TradingTabs: IComponent = () => {
   return (
-    <Tabs defaultValue='market' className='p-6 grow'>
-      <TabsList className='grid grid-cols-4 bg-purple2 mb-3 p-1 gap-1 rounded-xl h-fit'>
+    <Tabs defaultValue='market' className='p-6 grow gap-3 flex flex-col'>
+      <TabsList className='grid grid-cols-4 bg-purple2 p-1 gap-1 rounded-xl h-fit'>
         {Object.entries(OrderRecords).map(([key, value]) => (
           <TabButton key={key} value={key as OrderType} label={value} />
         ))}
       </TabsList>
-      <TabsContent value='market'>
-        <OrderWrapper type='market' />
-      </TabsContent>
-      <TabsContent value='limit'>
-        <OrderWrapper type='limit' />
-      </TabsContent>
-      <TabsContent value='stop'>
-        <OrderWrapper type='stop' />
-      </TabsContent>
+      <OrderContent value='market' />
+      <OrderContent value='limit' />
+      <OrderContent value='stop' />
     </Tabs>
   );
 };

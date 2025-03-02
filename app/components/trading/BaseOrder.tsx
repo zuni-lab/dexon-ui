@@ -1,6 +1,7 @@
 'use client';
 
 import ConnectWallet from '@/components/ConnectWallet';
+import { WalletIcon } from '@/components/icons/Wallet';
 import { Button } from '@/components/shadcn/Button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/shadcn/Dialog';
 import { Input } from '@/components/shadcn/Input';
@@ -48,11 +49,13 @@ export const BaseOrder: React.FC<BaseOrderProps> = ({
       {/* Amount Input with Token Selection */}
       <div>
         <div className='flex items-center justify-between mb-2'>
-          <div className='text-sm text-gray-400'>Amount</div>
-          <div className='text-xs'>
-            Balance:{' '}
-            {tokenBalance ? Number(formatUnits(tokenBalance, selectedToken.decimals)).toFixed(2) : '0.00'}{' '}
-            {selectedToken?.symbol}
+          <div className='text-sm font-semibold'>Amount</div>
+          <div className='flex items-center'>
+            <WalletIcon className='w-4 h-4 mr-1 opacity-60' />
+            <div className='text-sm text-gray-400'>
+              {tokenBalance ? Number(formatUnits(tokenBalance, selectedToken.decimals)).toFixed(2) : '0.00'}{' '}
+              {selectedToken?.symbol}
+            </div>
           </div>
         </div>
 

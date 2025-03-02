@@ -1,5 +1,6 @@
 'use client';
 
+import { WalletIcon } from '@/components/icons/Wallet';
 import { Button } from '@/components/shadcn/Button';
 import { Input } from '@/components/shadcn/Input';
 import { Tokens } from '@/constants/tokens';
@@ -7,13 +8,22 @@ import { useHandleSwap } from '@/hooks/useHandleSwap';
 import { useQuotePrice } from '@/hooks/useQuotePrice';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
+import { erc20Abi, formatUnits, zeroAddress } from 'viem';
+import { useAccount, useReadContract } from 'wagmi';
 import { BaseOrder } from './BaseOrder';
 import { useOrderSide } from './OrderWrapper';
 
 export const MarketOrder: React.FC = () => {
+  const { address } = useAccount();
   const orderSide = useOrderSide();
   const [amount, setAmount] = useState('0');
   const [selectedToken, setSelectedToken] = useState(Tokens.ETH);
+  const { data: usdcBalance } = useReadContract({
+    abi: erc20Abi,
+    address: Tokens.USDC.address,
+    functionName: 'balanceOf',
+    args: [address || zeroAddress]
+  });
 
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
@@ -46,7 +56,16 @@ export const MarketOrder: React.FC = () => {
       isPending={isPending}
     >
       <div className='mb-6'>
-        <div className='text-sm text-gray-400 mb-2'>USDC Value</div>
+        <div className='flex items-center justify-between mb-2'>
+          <div className='text-sm font-semibold'>USDC Value</div>
+          <div className='flex items-center'>
+            <WalletIcon className='w-4 h-4 mr-1 opacity-60' />
+            <div className='text-sm text-gray-400'>
+              {usdcBalance ? Number(formatUnits(usdcBalance, Tokens.USDC.decimals)).toFixed(2) : '0.00'}{' '}
+              {Tokens.USDC.symbol}
+            </div>
+          </div>
+        </div>
         <Input
           type='text'
           value={usdcAmount}

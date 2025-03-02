@@ -1,5 +1,6 @@
+type TriggerCondition = '>' | '<' | '=';
 interface OrderDetails {
-  trigger_condition: '>' | '<' | '=';
+  trigger_condition: TriggerCondition;
   trigger_price: string;
   token_name: string;
   amount: string;

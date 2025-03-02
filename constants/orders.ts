@@ -33,3 +33,15 @@ export const DEXON_TYPED_DATA = {
     primaryType: 'Order'
   }
 } as const;
+
+export enum TriggerEnum {
+  GREATER_THAN = 'Greater than',
+  LESS_THAN = 'Less than',
+  EQUAL_TO = 'Equal to'
+}
+
+export const TriggerConditionMapping: Record<TriggerEnum, TriggerCondition> = {
+  [TriggerEnum.GREATER_THAN]: '>',
+  [TriggerEnum.LESS_THAN]: '<',
+  [TriggerEnum.EQUAL_TO]: '='
+} as const;

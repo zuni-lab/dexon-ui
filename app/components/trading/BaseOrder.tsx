@@ -1,12 +1,11 @@
 'use client';
 
-import ConnectWallet from '@/components/ConnectWallet';
-import { WalletIcon } from '@/components/icons/Wallet';
 import { Button } from '@/components/shadcn/Button';
 import { Input } from '@/components/shadcn/Input';
 import { OrderSide } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { useSelectedToken } from '@/state/token';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Loader2 } from 'lucide-react';
 import { erc20Abi, formatUnits, zeroAddress } from 'viem';
 import { useAccount, useReadContract } from 'wagmi';
@@ -71,7 +70,16 @@ export const BaseOrder: React.FC<BaseOrderProps> = ({
             {isPending ? 'Submitting...' : `${orderSide === OrderSide.BUY ? 'Buy' : 'Sell'} ${token.symbol}`}
           </Button>
         ) : (
-          <ConnectWallet />
+          <ConnectButton.Custom>
+            {({ openConnectModal }) => (
+              <Button
+                className='w-full p-4 h-14 rounded-xl text-lg font-medium bg-button'
+                onClick={openConnectModal}
+              >
+                Connect Wallet
+              </Button>
+            )}
+          </ConnectButton.Custom>
         )}
       </div>
     </div>

@@ -54,6 +54,9 @@ export const isValidFloat = (val: string) => {
 };
 
 export const formatNumber = (num: number) => {
+  if (num === 0) {
+    return '0.0';
+  }
   const [integer, decimal] = num.toString().split('.');
   return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${decimal ? `.${decimal}` : ''}`;
 };

@@ -9,6 +9,15 @@ const nextConfig = {
     // https://github.com/WalletConnect/walletconnect-monorepo/issues/1908#issuecomment-1487801131
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     return config;
+  },
+  images: {
+    remotePatterns: [
+      {
+        hostname: '**',
+        protocol: 'https',
+        pathname: '/**'
+      }
+    ]
   }
 };
 

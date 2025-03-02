@@ -12,7 +12,7 @@ import { useAccount, useReadContract } from 'wagmi';
 import { Balance } from './Balance';
 import { BaseOrder } from './BaseOrder';
 import { useOrderSide } from './OrderWrapper';
-import { StableCoin } from './StableCoin';
+import { StableCoinSection } from './StableCoin';
 
 export const MarketOrder: React.FC = () => {
   const { address } = useAccount();
@@ -64,13 +64,7 @@ export const MarketOrder: React.FC = () => {
         </div>
       )}
     >
-      <div className='flex flex-col gap-1 px-4 py-4'>
-        <div className='flex items-center justify-between'>
-          <h2 className='text-sm font-semibold'>You pay</h2>
-          <Balance balance={usdcBalance} token={Tokens.USDC} />
-        </div>
-        <StableCoin amount={usdcAmount} icon={TokensUI.USDC.icon} symbol={'USDC'} />
-      </div>
+      <StableCoinSection orderSide={orderSide} usdcBalance={usdcBalance} usdcAmount={usdcAmount} />
     </BaseOrder>
   );
 };

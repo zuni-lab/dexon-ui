@@ -33,15 +33,19 @@ export const TradeableTokens: Record<
   TradeableToken,
   {
     icon: React.ReactNode;
+    name: string;
   }
 > = {
   ETH: {
-    icon: createElement(EthereumIcon)
+    icon: createElement(EthereumIcon),
+    name: 'Ethereum'
   },
   BTC: {
-    icon: createElement(BitcoinIcon)
+    icon: createElement(BitcoinIcon),
+    name: 'Bitcoin'
   },
   SOL: {
-    icon: createElement(SolanaIcon)
+    icon: createElement(SolanaIcon),
+    name: 'Solana'
   }
 };

@@ -1,7 +1,7 @@
 import { Button } from '@/components/shadcn/Button';
 import { TradeableTokens } from '@/constants/tokens';
+import { useSelectedToken } from '@/state/token';
 import { cn } from '@/utils/shadcn';
-import { useSelectedToken } from './ChartPanel';
 
 const TokenButton: IComponent<{
   icon: React.ReactNode;
@@ -34,7 +34,7 @@ export const TokenSelector: IComponent = () => {
           key={token}
           icon={icon}
           token={token as TradeableToken}
-          onClick={() => setToken(token as TokenKey)}
+          onClick={() => setToken(token as TradeableToken)}
           selected={selectedToken === token}
         />
       ))}

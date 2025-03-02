@@ -1,7 +1,7 @@
 'use client';
 
 import { DEXON_ADDRESS } from '@/constants/contracts';
-import { DEXON_TYPED_DATA, type OrderSide } from '@/constants/orders';
+import { DEXON_TYPED_DATA, type OrderSide, OrderTypeMapping } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
 import { useCallback, useState } from 'react';
@@ -12,7 +12,7 @@ import { useAccount, usePublicClient, useSignTypedData } from 'wagmi';
 interface UsePlaceOrderProps {
   amount: string;
   orderSide: OrderSide;
-  orderType: OrderType;
+  orderType: Exclude<OrderType, 'market' | 'twap'>;
   selectedToken: Token;
   triggerPrice: string;
 }
@@ -75,7 +75,7 @@ export const usePlaceOrder = ({
         amount: parseUnits(amount, selectedToken.decimals),
         triggerPrice: parseUnits(triggerPrice, 18),
         slippage,
-        orderType,
+        orderType: OrderTypeMapping[orderType],
         orderSide,
         deadline
       };

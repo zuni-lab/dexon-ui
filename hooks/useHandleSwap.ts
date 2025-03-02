@@ -84,8 +84,7 @@ export const useHandleSwap = ({ amount, orderSide, selectedToken, usdcAmount }: 
 
       // Execute swap
       const path = findPaths(selectedToken.address, Tokens.USDC.address);
-      const swapToken = orderSide === OrderSide.BUY ? Tokens.USDC : selectedToken;
-      const swapAmount = parseUnits(amount, swapToken.decimals);
+      const swapAmount = parseUnits(amount, selectedToken.decimals);
 
       let swapTx: `0x${string}`;
       if (orderSide === OrderSide.BUY) {

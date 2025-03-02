@@ -8,6 +8,7 @@ export const SolanaIcon: ISvgComponent = () => {
       xmlns='http://www.w3.org/2000/svg'
       xmlnsXlink='http://www.w3.org/1999/xlink'
     >
+      <title>Solana Icon</title>
       <circle cx='12' cy='12' r='12' fill='url(#pattern0_47_131)' />
       <defs>
         <pattern id='pattern0_47_131' patternContentUnits='objectBoundingBox' width='1' height='1'>
@@ -35,6 +36,7 @@ export const EthereumIcon: ISvgComponent = () => {
       xmlns='http://www.w3.org/2000/svg'
       xmlnsXlink='http://www.w3.org/1999/xlink'
     >
+      <title>Ethereum Icon</title>
       <circle cx='12.5' cy='12' r='12' fill='url(#pattern0_47_133)' />
       <defs>
         <pattern id='pattern0_47_133' patternContentUnits='objectBoundingBox' width='1' height='1'>
@@ -62,6 +64,7 @@ export const BitcoinIcon: ISvgComponent = () => {
       xmlns='http://www.w3.org/2000/svg'
       xmlnsXlink='http://www.w3.org/1999/xlink'
     >
+      <title>Bitcoin Icon</title>
       <circle cx='12.5' cy='12' r='12' fill='url(#pattern0_47_135)' />
       <defs>
         <pattern id='pattern0_47_135' patternContentUnits='objectBoundingBox' width='1' height='1'>

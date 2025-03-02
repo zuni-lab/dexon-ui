@@ -5,6 +5,11 @@ export const OrderRecords: Record<OrderType, string> = {
   twap: 'Twap'
 } as const;
 
+export const OrderTypeMapping: Record<Exclude<OrderType, 'market' | 'twap'>, number> = {
+  limit: 0,
+  stop: 1
+} as const;
+
 export enum OrderSide {
   BUY = 0,
   SELL = 1

@@ -2,10 +2,12 @@
 
 import { UNISWAP_SWAP_ROUTER_ABI } from '@/abi/uniswapV3';
 import { chatService } from '@/api/chat';
+import { healthService } from '@/api/health';
 import { DEXON_ADDRESS, UNISWAP_SWAP_ROUTER_ADDRESS } from '@/constants/contracts';
 import { DEXON_TYPED_DATA, OrderTypeMapping } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
+import { useQuery } from '@tanstack/react-query';
 import { readContract, writeContract } from '@wagmi/core';
 import { useCallback, useState } from 'react';
 import { type Hex, erc20Abi, maxUint256, parseUnits } from 'viem';
@@ -13,6 +15,28 @@ import { monadTestnet } from 'viem/chains';
 import { useAccount, useConfig, usePublicClient, useSignTypedData } from 'wagmi';
 import { ChatArea } from './components/ChatArea';
 import { InputArea } from './components/InputArea';
+
+export const Health = () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['health'],
+    queryFn: () => healthService.health()
+  });
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  return (
+    <div>
+      {(() => {
+        switch (data?.data) {
+          case 'OK':
+            return <div className='text-green-500'>ok</div>;
+          default:
+            return <div className='text-red-500'>error</div>;
+        }
+      })()}
+    </div>
+  );
+};
 
 export const MainContent = () => {
   const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);

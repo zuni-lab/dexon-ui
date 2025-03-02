@@ -7,13 +7,12 @@ export const apiClient = axios.create({
   }
 });
 
-// Add response interceptor for SSE handling
 apiClient.interceptors.response.use(
   (response) => {
     if (response.headers['content-type']?.includes('text/event-stream')) {
       return {
         ...response,
-        data: response.data, // Keep raw response for SSE handling
+        data: response.data,
         isSSE: true
       };
     }

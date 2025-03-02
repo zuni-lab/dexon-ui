@@ -1,12 +1,12 @@
 import { Button } from '@/components/shadcn/Button';
-import { TradeableTokens } from '@/constants/tokens';
+import { TradeableTokensUI } from '@/constants/tokens';
 import { useSelectedToken } from '@/state/token';
 import { cn } from '@/utils/shadcn';
 
 const TokenButton: IComponent<{
   icon: React.ReactNode;
-  token: TradeableToken;
-  onClick: () => void;
+  token: TokenKey;
+  onClick?: () => void;
   selected: boolean;
 }> = ({ icon, token, onClick, selected }) => {
   return (
@@ -29,7 +29,7 @@ export const TokenSelector: IComponent = () => {
   const { token: selectedToken, setToken } = useSelectedToken();
   return (
     <div className='flex gap-2'>
-      {Object.entries(TradeableTokens).map(([token, { icon }]) => (
+      {Object.entries(TradeableTokensUI).map(([token, { icon }]) => (
         <TokenButton
           key={token}
           icon={icon}

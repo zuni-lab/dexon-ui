@@ -1,5 +1,9 @@
 'use client';
 
 export const Footer: IComponent = () => {
-  return <footer className='container mx-auto h-12 bg-red-300'>Footer</footer>;
+  return (
+    <footer className='h-8 flex justify-end'>
+      <span className='text-sm text-gray-400'>Copyright © 2025 Zuni</span>
+    </footer>
+  );
 };

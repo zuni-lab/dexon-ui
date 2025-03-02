@@ -27,7 +27,7 @@ export const OrderWrapper: IComponent<OrderWrapperProps> = ({ type }) => {
 
   return (
     <OrderSideContext.Provider value={orderSide}>
-      <div className='bg-purple3 h-full rounded-xl overflow-hidden'>
+      <div className='bg-purple3 h-full rounded-xl overflow-hidden flex flex-col'>
         <div className='grid grid-cols-2 h-[52px]'>
           <OrderButton
             isActive={orderSide === OrderSide.BUY}

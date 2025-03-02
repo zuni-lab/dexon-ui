@@ -32,6 +32,7 @@ const config = {
         purple2: '#1E1738',
         purple3: '#322959',
         purple4: '#A48EFF',
+        button: '#6A3AD5',
         red: {
           DEFAULT: '#EA0505'
         }

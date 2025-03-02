@@ -52,3 +52,8 @@ const FLOAT_REGEX = /^[+-]?([0-9]*[.])?[0-9]+$/;
 export const isValidFloat = (val: string) => {
   return FLOAT_REGEX.test(val);
 };
+
+export const formatNumber = (num: number) => {
+  const [integer, decimal] = num.toString().split('.');
+  return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${decimal ? `.${decimal}` : ''}`;
+};

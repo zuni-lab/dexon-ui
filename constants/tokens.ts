@@ -1,4 +1,4 @@
-import { BitcoinIcon, EthereumIcon, SolanaIcon } from '@/components/icons/Tokens';
+import { BitcoinIcon, EthereumIcon, SolanaIcon, USDCIcon } from '@/components/icons/Tokens';
 import type React from 'react';
 import { createElement } from 'react';
 
@@ -29,8 +29,8 @@ export const Tokens: Record<TokenKey, Token> = {
   }
 };
 
-export const TradeableTokens: Record<
-  TradeableToken,
+export const TokensUI: Record<
+  TokenKey,
   {
     icon: React.ReactNode;
     name: string;
@@ -47,5 +47,21 @@ export const TradeableTokens: Record<
   SOL: {
     icon: createElement(SolanaIcon),
     name: 'Solana'
+  },
+  USDC: {
+    icon: createElement(USDCIcon),
+    name: 'USD Coin'
   }
+};
+
+export const TradeableTokensUI: Record<
+  TradeableToken,
+  {
+    icon: React.ReactNode;
+    name: string;
+  }
+> = {
+  ETH: TokensUI.ETH,
+  BTC: TokensUI.BTC,
+  SOL: TokensUI.SOL
 };

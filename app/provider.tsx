@@ -1,5 +1,6 @@
 'use client';
 
+import { Toaster } from '@/components/shadcn/Toaster';
 import { ProjectENV } from '@env';
 import { RainbowKitProvider, type Theme, getDefaultConfig, lightTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
@@ -37,8 +38,9 @@ const Providers = ({ children }: React.PropsWithChildren) => {
     <WagmiProvider config={config}>
       <QueryClientProvider client={client}>
         <RainbowKitProvider theme={connectBtnTheme}>{children}</RainbowKitProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition='bottom-left' />
       </QueryClientProvider>
+      <Toaster />
     </WagmiProvider>
   );
 };

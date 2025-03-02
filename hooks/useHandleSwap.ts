@@ -16,9 +16,16 @@ interface UseHandleSwapProps {
   orderSide: OrderSide;
   selectedToken: Token;
   usdcAmount: string;
+  callback?: () => void;
 }
 
-export const useHandleSwap = ({ amount, orderSide, selectedToken, usdcAmount }: UseHandleSwapProps) => {
+export const useHandleSwap = ({
+  amount,
+  orderSide,
+  selectedToken,
+  usdcAmount,
+  callback
+}: UseHandleSwapProps) => {
   const [isPending, setIsPending] = useState(false);
   const { address } = useAccount();
   const config = useConfig();
@@ -123,12 +130,15 @@ export const useHandleSwap = ({ amount, orderSide, selectedToken, usdcAmount }: 
       });
 
       toast.success('Swap executed successfully!');
+
       setIsPending(false);
+
+      callback?.();
     } catch (error) {
       toast.error('Failed to execute swap');
       setIsPending(false);
     }
-  }, [address, amount, config, orderSide, publicClient, selectedToken, usdcAmount]);
+  }, [address, amount, config, orderSide, publicClient, selectedToken, usdcAmount, callback]);
 
   return {
     handleSwap,

@@ -1,32 +1,38 @@
 'use client';
 
 import { Button } from '@/components/shadcn/Button';
-import { Tokens, TokensUI } from '@/constants/tokens';
+import { Tokens } from '@/constants/tokens';
 import { useHandleSwap } from '@/hooks/useHandleSwap';
 import { useQuotePrice } from '@/hooks/useQuotePrice';
 import { useSelectedToken } from '@/state/token';
 import { ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { erc20Abi, zeroAddress } from 'viem';
 import { useAccount, useReadContract } from 'wagmi';
-import { Balance } from './Balance';
 import { BaseOrder } from './BaseOrder';
 import { useOrderSide } from './OrderWrapper';
 import { StableCoinSection } from './StableCoin';
 
 export const MarketOrder: React.FC = () => {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
   const [amount, setAmount] = useState('');
-  const { data: usdcBalance } = useReadContract({
+  const { token: selectedToken } = useSelectedToken();
+  const token = Tokens[selectedToken];
+
+  const { data: usdcBalance, refetch: refetchUsdcBalance } = useReadContract({
     abi: erc20Abi,
     address: Tokens.USDC.address,
     functionName: 'balanceOf',
     args: [address || zeroAddress]
   });
 
-  const { token: selectedToken } = useSelectedToken();
-  const token = Tokens[selectedToken];
+  const { data: tokenBalance, refetch: refetchTokenBalance } = useReadContract({
+    abi: erc20Abi,
+    address: token.address,
+    functionName: 'balanceOf',
+    args: [address || zeroAddress]
+  });
 
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
@@ -34,11 +40,17 @@ export const MarketOrder: React.FC = () => {
     selectedToken: token
   });
 
+  const refreshBalances = useCallback(async () => {
+    await refetchUsdcBalance();
+    await refetchTokenBalance();
+  }, [refetchUsdcBalance, refetchTokenBalance]);
+
   const { handleSwap, isPending } = useHandleSwap({
     amount,
     orderSide,
     selectedToken: token,
-    usdcAmount
+    usdcAmount,
+    callback: refreshBalances
   });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +67,9 @@ export const MarketOrder: React.FC = () => {
       onAmountChange={handleAmountChange}
       onOrderSubmit={handleSwap}
       isPending={isPending}
+      tokenBalance={tokenBalance || BigInt(0)}
+      selectedToken={token}
+      isConnected={isConnected}
       renderFooter={() => (
         <div className='bg-purple4/60 mt-4 mx-4 py-2 rounded-xl font-semibold text-lg'>
           <Button variant='ghost' className='w-full justify-between text-white group'>

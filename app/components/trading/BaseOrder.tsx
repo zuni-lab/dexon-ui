@@ -3,12 +3,9 @@
 import { Button } from '@/components/shadcn/Button';
 import { Input } from '@/components/shadcn/Input';
 import { OrderSide } from '@/constants/orders';
-import { Tokens } from '@/constants/tokens';
-import { useSelectedToken } from '@/state/token';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Loader2 } from 'lucide-react';
-import { erc20Abi, formatUnits, zeroAddress } from 'viem';
-import { useAccount, useReadContract } from 'wagmi';
+import { toast } from 'sonner';
 import { Balance } from './Balance';
 import { TokensModal } from './TokensModal';
 
@@ -18,6 +15,9 @@ interface BaseOrderProps {
   priceRate: string;
   usdcAmount: string;
   isPending: boolean;
+  isConnected: boolean;
+  tokenBalance: bigint;
+  selectedToken: Token;
   onAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onOrderSubmit: () => Promise<void>;
   children?: React.ReactNode;
@@ -29,28 +29,19 @@ export const BaseOrder: React.FC<BaseOrderProps> = ({
   amount,
   priceRate,
   isPending,
+  tokenBalance,
+  isConnected,
+  selectedToken,
   onAmountChange,
   onOrderSubmit,
-  children,
-  renderFooter
+  renderFooter,
+  children
 }) => {
-  const { token: selectedToken } = useSelectedToken();
-  const token = Tokens[selectedToken];
-
-  const { address, isConnected } = useAccount();
-
-  const { data: tokenBalance } = useReadContract({
-    abi: erc20Abi,
-    address: token.address,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress]
-  });
-
   return (
     <div className='flex flex-col grow'>
-      <div className='m-2 bg-purple2 rounded-2xl'>
+      <div className='m-2 bg-purple2 rounded-2xl divide-y-[2px] divide-purple3'>
         <TokenInput
-          token={token}
+          token={selectedToken}
           tokenBalance={tokenBalance}
           amount={amount}
           priceRate={priceRate}
@@ -66,8 +57,10 @@ export const BaseOrder: React.FC<BaseOrderProps> = ({
             onClick={onOrderSubmit}
             disabled={isPending}
           >
-            {isPending && <Loader2 className='w-4 h-4 text-gray-400 animate-spin' />}
-            {isPending ? 'Submitting...' : `${orderSide === OrderSide.BUY ? 'Buy' : 'Sell'} ${token.symbol}`}
+            {isPending && <Loader2 className='w-5 h-5 text-gray-400 animate-spin mr-2' />}
+            {isPending
+              ? 'Submitting...'
+              : `${orderSide === OrderSide.BUY ? 'Buy' : 'Sell'} ${selectedToken.symbol}`}
           </Button>
         ) : (
           <ConnectButton.Custom>

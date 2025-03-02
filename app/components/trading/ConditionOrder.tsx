@@ -25,7 +25,7 @@ const TriggerPrice: IComponent<{
   setTriggerPrice: (value: string) => void;
 }> = ({ triggerCondition, triggerPrice, setTriggerPrice }) => {
   return (
-    <div className='flex flex-col py-4 border-b-[3px] border-purple3'>
+    <div className='flex flex-col py-4'>
       <div className='flex items-center justify-between px-4'>
         <p className='text-sm font-semibold flex items-center'>
           When price
@@ -61,7 +61,7 @@ const TriggerPrice: IComponent<{
 };
 
 export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
   const [amount, setAmount] = useState('');
   const [triggerPrice, setTriggerPrice] = useState('');
@@ -80,6 +80,13 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
     amount,
     orderSide,
     selectedToken: token
+  });
+
+  const { data: tokenBalance, refetch: refetchTokenBalance } = useReadContract({
+    abi: erc20Abi,
+    address: token.address,
+    functionName: 'balanceOf',
+    args: [address || zeroAddress]
   });
 
   const { placeOrder, isPending } = usePlaceOrder({
@@ -113,6 +120,9 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
       onAmountChange={handleAmountChange}
       onOrderSubmit={placeOrder}
       isPending={isPending}
+      isConnected={isConnected}
+      tokenBalance={tokenBalance || BigInt(0)}
+      selectedToken={token}
     >
       <TriggerPrice
         triggerCondition={condition}

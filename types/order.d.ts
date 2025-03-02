@@ -6,4 +6,4 @@ interface OrderDetails {
   order_side: 'buy' | 'sell';
 }
 
-type OrderType = 'market' | 'limit' | 'stop';
+type OrderType = 'market' | 'limit' | 'stop' | 'twap';

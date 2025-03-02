@@ -1,7 +1,14 @@
-export const OrderTypes = {
-  STOP: 0,
-  LIMIT: 1
-};
+export const OrderRecords: Record<OrderType, string> = {
+  market: 'Market',
+  limit: 'Limit',
+  stop: 'Stop',
+  twap: 'Twap'
+} as const;
+
+export enum OrderSide {
+  BUY = 0,
+  SELL = 1
+}
 
 export const DEXON_TYPED_DATA = {
   Order: {

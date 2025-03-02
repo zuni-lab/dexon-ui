@@ -26,12 +26,12 @@ const config = {
     },
     extend: {
       colors: {
-        primary: '#251D46'
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        primary: '#251D46',
+        secondary: '#2C234E',
+        purple1: '#0D0820',
+        purple2: '#1E1738',
+        purple3: '#322959',
+        red: '#EA0505'
       },
       keyframes: {
         'accordion-down': {

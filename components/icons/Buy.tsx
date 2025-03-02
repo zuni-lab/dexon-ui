@@ -15,8 +15,8 @@ export const BuyIcon: ISvgComponent = () => {
           y2='19.6875'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#967CFF' />
-          <stop offset='1' stop-color='#BA7FE2' />
+          <stop stopColor='#967CFF' />
+          <stop offset='1' stopColor='#BA7FE2' />
         </linearGradient>
       </defs>
     </svg>

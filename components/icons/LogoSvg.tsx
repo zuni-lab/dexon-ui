@@ -2,7 +2,7 @@ export const LogoSvg: ISvgComponent = () => {
   return (
     // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
     <svg xmlns='http://www.w3.org/2000/svg' width='115' height='32' viewBox='0 0 115 32' fill='none'>
-      <g clip-path='url(#clip0_11_1759)'>
+      <g clipPath='url(#clip0_11_1759)'>
         <path
           d='M44.3435 21.727L57.3505 6.05595H46.1701C45.3828 6.05595 44.8002 5.88157 44.3986 5.53279C44.0049 5.18402 43.8002 4.72427 43.8002 4.16148C43.8002 3.59868 43.9971 3.09138 44.3986 2.72675C44.7923 2.36212 45.3828 2.17981 46.1701 2.17981H60.5786C62.4446 2.17981 63.3737 3.05967 63.3737 4.80354C63.3737 5.63584 63.2162 6.30168 62.9092 6.80106C62.6021 7.30044 61.9722 8.10896 61.0274 9.2187L48.8629 23.7959H62.2714C63.0666 23.7959 63.6571 23.9623 64.0508 24.2873C64.4445 24.6202 64.6413 25.08 64.6413 25.6666C64.6413 26.2531 64.4445 26.7684 64.0508 27.1251C63.6571 27.4818 63.0666 27.6641 62.2714 27.6641H45.8237C44.7057 27.6641 43.8632 27.4104 43.3042 26.911C42.7373 26.4037 42.4539 25.73 42.4539 24.8818C42.4539 24.5885 42.5011 24.3269 42.5956 24.0812C42.6901 23.8355 42.8082 23.6056 42.9656 23.3916C43.1231 23.1776 43.3357 22.9081 43.6113 22.5752C43.8868 22.2422 44.1309 21.9569 44.3356 21.7111L44.3435 21.727Z'
           fill='white'
@@ -41,8 +41,8 @@ export const LogoSvg: ISvgComponent = () => {
           y2='10.5979'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#0080FF' />
-          <stop offset='1' stop-color='#A148FF' />
+          <stop stopColor='#0080FF' />
+          <stop offset='1' stopColor='#A148FF' />
         </linearGradient>
         <linearGradient
           id='paint1_linear_11_1759'
@@ -52,8 +52,8 @@ export const LogoSvg: ISvgComponent = () => {
           y2='21.4496'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#0080FF' />
-          <stop offset='1' stop-color='#A148FF' />
+          <stop stopColor='#0080FF' />
+          <stop offset='1' stopColor='#A148FF' />
         </linearGradient>
         <clipPath id='clip0_11_1759'>
           <rect width='115' height='32' fill='white' />

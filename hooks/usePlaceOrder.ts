@@ -1,7 +1,7 @@
 'use client';
 
 import { DEXON_ADDRESS } from '@/constants/contracts';
-import { DEXON_TYPED_DATA, type OrderSide, type OrderType } from '@/constants/orders';
+import { DEXON_TYPED_DATA, type OrderSide } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
 import { useCallback, useState } from 'react';

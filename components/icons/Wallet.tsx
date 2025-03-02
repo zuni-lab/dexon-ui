@@ -15,8 +15,8 @@ export const WalletIcon: ISvgComponent = () => {
           y2='18'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#A48EFF' />
-          <stop offset='1' stop-color='#E7AED9' />
+          <stop stopColor='#A48EFF' />
+          <stop offset='1' stopColor='#E7AED9' />
         </linearGradient>
       </defs>
     </svg>

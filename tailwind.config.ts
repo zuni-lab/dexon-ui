@@ -31,6 +31,7 @@ const config = {
         purple1: '#0D0820',
         purple2: '#1E1738',
         purple3: '#322959',
+        purple4: '#A48EFF',
         red: '#EA0505'
       },
       keyframes: {

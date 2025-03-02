@@ -27,7 +27,7 @@ export const OrderWrapper: IComponent<OrderWrapperProps> = ({ type }) => {
 
   return (
     <OrderSideContext.Provider value={orderSide}>
-      <div className='bg-purple3 h-full rounded-xl'>
+      <div className='bg-purple3 h-full rounded-xl overflow-hidden'>
         <div className='grid grid-cols-2 h-[52px]'>
           <OrderButton
             isActive={orderSide === OrderSide.BUY}
@@ -61,13 +61,13 @@ const OrderButton = ({
     <Button
       variant='ghost'
       className={cn(
-        { 'bg-purple2 text-white': isActive },
-        'h-full font-semibold hover:bg-purple2 flex justify-center items-center gap-2.5 p-4'
+        { '!bg-transparent text-white': isActive },
+        'h-full font-semibold bg-purple2 hover:text-purple4 flex justify-center items-center gap-2.5 p-4 rounded-none transition-colors duration-150'
       )}
       onClick={onClick}
     >
-      <span className='text-sm'>{text}</span>
       {icon}
+      <span className='text-sm'>{text}</span>
     </Button>
   );
 };

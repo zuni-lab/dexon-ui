@@ -1,11 +1,12 @@
 import { cn } from '@/utils/shadcn';
+import { BoxInfo } from '../BoxInfo';
 
 export const TradingHeader: IComponent = () => {
   return (
     <div className='flex justify-between h-14 px-6 py-4 bg-purple1'>
       <PriceSection />
-      <Item label='Borrow Rate' value='0.0034% /hr' />
-      <Item label='Available Liq.' value='$2.50M' />
+      <BoxInfo label='Borrow Rate' value='0.0034% /hr' />
+      <BoxInfo label='Available Liq.' value='$2.50M' />
     </div>
   );
 };
@@ -19,15 +20,6 @@ const PriceSection: IComponent = () => {
         {!isPositive ? '-' : ''}
         0.93%
       </span>
-    </div>
-  );
-};
-
-const Item: IComponent<{ label: string; value: string }> = ({ label, value }) => {
-  return (
-    <div className='flex flex-col gap-.5 items-center justify-center text-white font-semibold'>
-      <span className='text-[10px] opacity-40'>{label}</span>
-      <span className='text-xs font-bold'>{value}</span>
     </div>
   );
 };

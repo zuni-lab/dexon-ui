@@ -10,7 +10,7 @@ import { BaseOrder } from './BaseOrder';
 import { useOrderSide } from './OrderWrapper';
 
 interface ConditionOrderProps {
-  orderType: Omit<OrderType, 'market' | 'twap'>;
+  orderType: Exclude<OrderType, 'market' | 'twap'>;
 }
 
 export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => {

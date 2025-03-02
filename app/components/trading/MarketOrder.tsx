@@ -6,6 +6,7 @@ import { Input } from '@/components/shadcn/Input';
 import { Tokens } from '@/constants/tokens';
 import { useHandleSwap } from '@/hooks/useHandleSwap';
 import { useQuotePrice } from '@/hooks/useQuotePrice';
+import { useSelectedToken } from '@/state/token';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { erc20Abi, formatUnits, zeroAddress } from 'viem';
@@ -17,7 +18,6 @@ export const MarketOrder: React.FC = () => {
   const { address } = useAccount();
   const orderSide = useOrderSide();
   const [amount, setAmount] = useState('0');
-  const [selectedToken, setSelectedToken] = useState(Tokens.ETH);
   const { data: usdcBalance } = useReadContract({
     abi: erc20Abi,
     address: Tokens.USDC.address,
@@ -25,16 +25,19 @@ export const MarketOrder: React.FC = () => {
     args: [address || zeroAddress]
   });
 
+  const { token: selectedToken } = useSelectedToken();
+  const token = Tokens[selectedToken];
+
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
     orderSide,
-    selectedToken
+    selectedToken: token
   });
 
   const { handleSwap, isPending } = useHandleSwap({
     amount,
     orderSide,
-    selectedToken,
+    selectedToken: token,
     usdcAmount
   });
 
@@ -49,9 +52,7 @@ export const MarketOrder: React.FC = () => {
       amount={amount}
       priceRate={priceRate}
       usdcAmount={usdcAmount}
-      selectedToken={selectedToken}
       onAmountChange={handleAmountChange}
-      onTokenSelect={setSelectedToken}
       onOrderSubmit={handleSwap}
       isPending={isPending}
     >

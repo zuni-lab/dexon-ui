@@ -6,6 +6,7 @@ import { OrderSide } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { usePlaceOrder } from '@/hooks/usePlaceOrder';
 import { useQuotePrice } from '@/hooks/useQuotePrice';
+import { useSelectedToken } from '@/state/token';
 import { useMemo, useState } from 'react';
 import { erc20Abi, formatUnits, zeroAddress } from 'viem';
 import { useAccount, useReadContract } from 'wagmi';
@@ -20,8 +21,8 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
   const { address } = useAccount();
   const orderSide = useOrderSide();
   const [amount, setAmount] = useState('0');
-  const [selectedToken, setSelectedToken] = useState(Tokens.ETH);
   const [triggerPrice, setTriggerPrice] = useState('0');
+
   const { data: usdcBalance } = useReadContract({
     abi: erc20Abi,
     address: Tokens.USDC.address,
@@ -29,17 +30,20 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
     args: [address || zeroAddress]
   });
 
+  const { token: selectedToken } = useSelectedToken();
+  const token = Tokens[selectedToken];
+
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
     orderSide,
-    selectedToken
+    selectedToken: token
   });
 
   const { placeOrder, isPending } = usePlaceOrder({
     amount,
     orderSide,
     orderType,
-    selectedToken,
+    selectedToken: token,
     triggerPrice
   });
 
@@ -64,9 +68,7 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
       priceRate={priceRate}
       usdcAmount={usdcAmount}
       orderSide={orderSide}
-      selectedToken={selectedToken}
       onAmountChange={handleAmountChange}
-      onTokenSelect={setSelectedToken}
       onOrderSubmit={placeOrder}
       isPending={isPending}
     >

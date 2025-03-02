@@ -32,7 +32,9 @@ const config = {
         purple2: '#1E1738',
         purple3: '#322959',
         purple4: '#A48EFF',
-        red: '#EA0505'
+        red: {
+          DEFAULT: '#EA0505'
+        }
       },
       keyframes: {
         'accordion-down': {

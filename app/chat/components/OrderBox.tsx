@@ -1,15 +1,17 @@
 import { determineOrderType } from '@/utils/order';
 
-const orderTypeColors = {
+const orderTypeColors: Record<OrderType, string> = {
   market: 'bg-blue-500/20 border-blue-500/50 text-blue-300',
   limit: 'bg-green-500/20 border-green-500/50 text-green-300',
-  stop: 'bg-red-500/20 border-red-500/50 text-red-300'
+  stop: 'bg-red-500/20 border-red-500/50 text-red-300',
+  twap: 'bg-purple-500/20 border-purple-500/50 text-purple-300'
 };
 
-const orderTypeBadgeColors = {
+const orderTypeBadgeColors: Record<OrderType, string> = {
   market: 'bg-blue-500/30 text-blue-200',
   limit: 'bg-green-500/30 text-green-200',
-  stop: 'bg-red-500/30 text-red-200'
+  stop: 'bg-red-500/30 text-red-200',
+  twap: 'bg-purple-500/30 text-purple-200'
 };
 
 export function OrderBox({ order }: { order: OrderDetails }) {

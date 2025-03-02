@@ -3,7 +3,7 @@
 import { UNISWAP_SWAP_ROUTER_ABI } from '@/abi/uniswapV3';
 import { chatService } from '@/api/chat';
 import { DEXON_ADDRESS, UNISWAP_SWAP_ROUTER_ADDRESS } from '@/constants/contracts';
-import { DEXON_TYPED_DATA, OrderTypes } from '@/constants/orders';
+import { DEXON_TYPED_DATA, OrderTypeMapping } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
 import { readContract, writeContract } from '@wagmi/core';
@@ -156,9 +156,9 @@ export const MainContent = () => {
           (order.order_side === 'buy' && triggerPrice < currentPrice) ||
           (order.order_side === 'sell' && triggerPrice > currentPrice)
         ) {
-          orderType = OrderTypes.LIMIT;
+          orderType = OrderTypeMapping.limit;
         } else {
-          orderType = OrderTypes.STOP;
+          orderType = OrderTypeMapping.stop;
         }
         const orderSide = order.order_side === 'buy' ? 0 : 1;
         await handlePlaceOrder(address, path, amount, triggerPrice, orderType, orderSide);

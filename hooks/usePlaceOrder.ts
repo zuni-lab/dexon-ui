@@ -1,13 +1,14 @@
 'use client';
 
 import { DEXON_ADDRESS } from '@/constants/contracts';
-import { DEXON_TYPED_DATA, type OrderSide, OrderTypeMapping } from '@/constants/orders';
+import { DEXON_TYPED_DATA, OrderSide, OrderTypeMapping } from '@/constants/orders';
 import { Tokens } from '@/constants/tokens';
 import { findPaths } from '@/utils/dex';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { maxUint256, parseUnits } from 'viem';
-import { useAccount, usePublicClient, useSignTypedData } from 'wagmi';
+import { useAccount, useConfig, usePublicClient, useSignTypedData } from 'wagmi';
+import { useApproveToken } from './useApproveToken';
 
 interface UsePlaceOrderProps {
   amount: string;
@@ -27,12 +28,18 @@ export const usePlaceOrder = ({
   const [isPending, setIsPending] = useState(false);
   const { address } = useAccount();
   const publicClient = usePublicClient();
+  const config = useConfig();
   const { signTypedDataAsync } = useSignTypedData();
+  const { approveToken } = useApproveToken();
 
   const placeOrder = useCallback(async () => {
     if (!address) {
       toast.error('Please connect your wallet');
       return;
+    }
+
+    if (!config) {
+      throw new Error('Config not found');
     }
 
     if (!amount || Number(amount) === 0) {
@@ -55,11 +62,29 @@ export const usePlaceOrder = ({
       const path = findPaths(selectedToken.address, Tokens.USDC.address);
 
       // TODO: Make these configurable in UI
-      const slippage = BigInt(10000); // 1%
+      const slippage = 0.1;
       const deadline = maxUint256;
 
       if (!publicClient) {
         throw new Error('Public client not found');
+      }
+
+      // Check and handle token approvals
+      if (orderSide === OrderSide.BUY) {
+        const maxUsdcAmount = (Number(amount) * Number(triggerPrice) * (1 + slippage)).toString();
+        const useAmount = parseUnits(maxUsdcAmount, Tokens.USDC.decimals);
+        await approveToken({
+          token: Tokens.USDC.address,
+          spender: DEXON_ADDRESS,
+          amount: useAmount
+        });
+      } else {
+        const useAmount = parseUnits(amount, selectedToken.decimals);
+        await approveToken({
+          token: selectedToken.address,
+          spender: DEXON_ADDRESS,
+          amount: useAmount
+        });
       }
 
       // Get EIP-712 domain
@@ -74,7 +99,7 @@ export const usePlaceOrder = ({
         path,
         amount: parseUnits(amount, selectedToken.decimals),
         triggerPrice: parseUnits(triggerPrice, 18),
-        slippage,
+        slippage: parseUnits(slippage.toString(), 6),
         orderType: OrderTypeMapping[orderType],
         orderSide,
         deadline
@@ -82,7 +107,12 @@ export const usePlaceOrder = ({
 
       // Sign order with EIP-712
       const signature = await signTypedDataAsync({
-        domain,
+        domain: {
+          name: domain.name,
+          version: domain.version,
+          chainId: domain.chainId,
+          verifyingContract: domain.verifyingContract
+        },
         types: DEXON_TYPED_DATA.Order.types,
         primaryType: DEXON_TYPED_DATA.Order.primaryType,
         message: order
@@ -105,16 +135,23 @@ export const usePlaceOrder = ({
       // }
 
       toast.success(`${orderType} order placed successfully!`);
-
-      // TODO: Reset form or update UI as needed
-      // setAmount('0');
-      // setTriggerPrice('0');
     } catch (error) {
       toast.error('Failed to place order');
     } finally {
       setIsPending(false);
     }
-  }, [address, amount, orderSide, orderType, publicClient, selectedToken, signTypedDataAsync, triggerPrice]);
+  }, [
+    address,
+    amount,
+    approveToken,
+    config,
+    orderSide,
+    orderType,
+    publicClient,
+    selectedToken,
+    signTypedDataAsync,
+    triggerPrice
+  ]);
 
   return {
     placeOrder,

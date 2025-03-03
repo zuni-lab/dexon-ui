@@ -60,3 +60,13 @@ export const formatNumber = (num: number) => {
   const [integer, decimal] = num.toString().split('.');
   return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${decimal ? `.${decimal}` : ''}`;
 };
+
+export const formatReadableUsd = (value: number) => {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+    maximumFractionDigits: 2
+  });
+  return formatter.format(value);
+};

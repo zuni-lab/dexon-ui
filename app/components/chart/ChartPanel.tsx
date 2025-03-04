@@ -1,8 +1,6 @@
 'use client';
 
-import { useSelectedToken } from '@/state/token';
 import { cn } from '@/utils/shadcn';
-import { useEffect } from 'react';
 import ChartStats from './ChartStats';
 import { PriceChart } from './PriceChart';
 import { TokenSelector } from './TokenSelector';
@@ -10,12 +8,6 @@ import { TokenSelector } from './TokenSelector';
 export const ChartPanel: IComponent<{
   className?: string;
 }> = ({ className }) => {
-  const { fetchStats } = useSelectedToken();
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
-
   return (
     <div
       className={cn(

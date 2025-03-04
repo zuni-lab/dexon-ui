@@ -1,5 +1,6 @@
 type Token = {
   address: `0x${string}`;
+  underlying: string;
   name: string;
   symbol: string;
   decimals: number;

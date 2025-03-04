@@ -1,11 +1,17 @@
+import { coingeckoService } from '@/api/coingecko';
 import { useSelectedToken } from '@/state/token';
 import { formatNumber } from '@/utils/tools';
+import { useQuery } from '@tanstack/react-query';
 import { BoxInfo } from '../BoxInfo';
 
 export default function ChartStats() {
-  const { stats, loading } = useSelectedToken();
+  const { token } = useSelectedToken();
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['stats', token],
+    queryFn: () => coingeckoService.getTokenStats(token)
+  });
 
-  if (loading || !stats) {
+  if (isLoading || !stats) {
     return (
       <div className='flex justify-end gap-5'>
         <BoxInfo label='24H Change' value='--' />
@@ -27,8 +33,8 @@ export default function ChartStats() {
         value={changeValue}
         valueClassName={isPositive ? 'text-green-500' : 'text-red-500'}
       />
-      <BoxInfo label='24H High' value={`$${stats.high24hPrice}`} />
-      <BoxInfo label='24H Low' value={`$${stats.low24hPrice}`} />
+      <BoxInfo label='24H High' value={`$${formatNumber(stats.high24hPrice)}`} />
+      <BoxInfo label='24H Low' value={`$${formatNumber(stats.low24hPrice)}`} />
       <BoxInfo label='24H Volume (USD)' value={formatNumber(Math.round(stats.volume24h))} />
     </div>
   );

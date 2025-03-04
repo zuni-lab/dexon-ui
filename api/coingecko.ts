@@ -1,3 +1,4 @@
+import { Tokens } from '@/constants/tokens';
 import axios from 'axios';
 
 export const coingeckoClient = axios.create({
@@ -9,7 +10,7 @@ export const coingeckoClient = axios.create({
 });
 
 export const coingeckoService = {
-  async getTokenStats(token: string): Promise<TokenStats> {
+  async getTokenStats(token: TradeableToken): Promise<TokenStats> {
     const currentTime = Math.floor(Date.now() / 1000);
     const from = currentTime - 24 * 3600;
     const to = currentTime;
@@ -22,7 +23,7 @@ export const coingeckoService = {
     });
 
     const response = await coingeckoClient.get<MarketChartDataResponse>(
-      `/coins/${token.toLowerCase()}/market_chart/range?${params}`
+      `/coins/${Tokens[token].underlying}/market_chart/range?${params}`
     );
     const { prices, total_volumes, market_caps } = response.data;
 

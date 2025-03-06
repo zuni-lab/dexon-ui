@@ -9,7 +9,7 @@ export const BoxInfo: IComponent<{
   return (
     <div className='flex flex-col gap-.5 items-center justify-center text-white font-semibold'>
       <span className={cn('text-xs opacity-40', labelClassName)}>{label}</span>
-      <span className={cn('text-sm font-bold', valueClassName)}>{value}</span>
+      <span className={cn('text-sm font-semibold', valueClassName)}>{value}</span>
     </div>
   );
 };

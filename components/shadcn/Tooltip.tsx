@@ -24,7 +24,7 @@ interface TooltipProviderProps {
   disableHoverableContent?: boolean;
 }
 
-const TooltipProvider: React.FC<TooltipProviderProps> = TooltipPrimitive.Provider;
+const TooltipProvider: IComponent<TooltipProviderProps> = TooltipPrimitive.Provider;
 
 TooltipProvider.displayName = 'Tooltip';
 

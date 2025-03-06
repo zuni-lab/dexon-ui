@@ -24,7 +24,7 @@ interface BaseOrderProps {
   renderFooter?: () => React.ReactNode;
 }
 
-export const BaseOrder: React.FC<BaseOrderProps> = ({
+export const BaseOrder: IComponent<BaseOrderProps> = ({
   orderSide,
   amount,
   priceRate,

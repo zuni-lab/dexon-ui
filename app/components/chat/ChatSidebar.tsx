@@ -1,213 +1,212 @@
 'use client';
 
+import { chatService } from '@/api/chat';
 import { Button } from '@/components/shadcn/Button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/shadcn/DropdownMenu';
-import { Input } from '@/components/shadcn/Input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn/Popover';
 import { cn } from '@/utils/shadcn';
-import { ChevronLeft, Edit2, MessageSquare, MoreVertical, Plus, Send, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
-
-interface Chat {
-  id: string;
-  title: string;
-  messages: Array<{ text: string; isUser: boolean }>;
-}
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { Bot, ChevronLeft, History, MessageSquare, Plus, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useAccount } from 'wagmi';
+import { ThreadDetails } from './ThreadDetails';
 
 interface ChatSidebarProps {
-  onClose: () => void;
   className?: string;
+  onClose?: () => void;
 }
 
 export const ChatSidebar: IComponent<ChatSidebarProps> = ({ onClose, className }) => {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [currentChat, setCurrentChat] = useState<Chat | null>(null);
-  const [isRenaming, setIsRenaming] = useState<string | null>(null);
-  const [newTitle, setNewTitle] = useState('');
-  const [showChatList, setShowChatList] = useState(true);
+  const { address } = useAccount();
+  const [showHistory, setShowHistory] = useState(false);
+  const [currentThread, setCurrentThread] = useState<Thread | null>(null);
+  const queryClient = useQueryClient();
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  const createNewChat = () => {
-    const newChat: Chat = {
-      id: Date.now().toString(),
-      title: `Chat ${chats.length + 1}`,
-      messages: []
-    };
-    setChats([...chats, newChat]);
-    setCurrentChat(newChat);
-    setShowChatList(false);
-  };
+  // Query for threads list
+  const { data: threadsResponse } = useQuery({
+    queryKey: ['chat', 'threads', address],
+    queryFn: async () => {
+      return chatService.listThreads({
+        user_address: address!,
+        offset: 0,
+        limit: 10
+      });
+    },
+    enabled: !!address
+  });
 
-  const deleteChat = (chatId: string) => {
-    setChats(chats.filter((chat) => chat.id !== chatId));
-    if (currentChat?.id === chatId) {
-      setCurrentChat(null);
-      setShowChatList(true);
+  // Query for current thread details
+  const { data: threadDetails, isLoading } = useQuery({
+    queryKey: ['chat', 'thread', currentThread?.thread_id, address],
+    queryFn: async () => {
+      if (!currentThread || !address) return null;
+      return chatService.getThreadDetails({
+        thread_id: currentThread.thread_id,
+        user_address: address
+      });
+    },
+    enabled: !!currentThread && !!address
+  });
+
+  const threads = threadsResponse?.data || [];
+  const messages = threadDetails?.message || [];
+
+  // Load latest thread on initial load
+  useEffect(() => {
+    if (threads.length > 0 && !currentThread) {
+      setCurrentThread(threads[0]);
     }
+  }, [threads]);
+
+  const handleSelectThread = useCallback((thread: Thread) => {
+    setCurrentThread(thread);
+    setShowHistory(false);
+  }, []);
+
+  const handleSendMessage = async (message: string) => {
+    if (!address || !currentThread) return;
+
+    try {
+      await chatService.sendMessage({
+        message,
+        threadId: currentThread.thread_id,
+        userAddress: address
+      });
+
+      // Invalidate queries to refresh data
+      await queryClient.invalidateQueries({
+        queryKey: ['chat', 'threads', address]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['chat', 'thread', currentThread.thread_id, address]
+      });
+    } catch (error) {}
   };
 
-  const startRenaming = (chat: Chat) => {
-    setIsRenaming(chat.id);
-    setNewTitle(chat.title);
-  };
-
-  const handleRename = (chatId: string) => {
-    setChats(chats.map((chat) => (chat.id === chatId ? { ...chat, title: newTitle } : chat)));
-    setIsRenaming(null);
-  };
+  const handleNewChat = useCallback(() => {
+    setCurrentThread(null);
+    setIsHistoryOpen(false);
+    // Clear messages for new chat
+    queryClient.setQueryData(['chat', 'thread', currentThread?.thread_id, address], null);
+  }, [currentThread?.thread_id, address, queryClient]);
 
   return (
-    <div
-      className={cn(
-        'fixed right-0 top-0 h-screen w-80 bg-purple2 border-l border-purple3 z-50 animate-in slide-in-from-right duration-300',
-        className
-      )}
-    >
-      <div className='flex flex-col h-full'>
+    <>
+      <div
+        className={cn(
+          'w-96 bg-purple2 border-l border-purple3 z-50 flex flex-col rounded-l-xl overflow-hidden my-[2px]',
+          className
+        )}
+      >
         {/* Header */}
-        <div className='flex items-center justify-between p-4 border-b border-purple3'>
-          {!showChatList && currentChat && (
-            <Button variant='ghost' size='icon' onClick={() => setShowChatList(true)} className='mr-2'>
-              <ChevronLeft className='w-5 h-5' />
-            </Button>
-          )}
-          <div className='flex items-center gap-2 text-purple4'>
-            <MessageSquare className='w-5 h-5' />
-            <span className='font-semibold'>{showChatList ? 'Chats' : currentChat?.title || 'New Chat'}</span>
+        <div className='flex items-center justify-between px-4 py-3 border-b border-purple3 bg-purple1'>
+          <div className='flex items-center gap-2'>
+            {showHistory && (
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={() => setShowHistory(false)}
+                className='text-gray-300 hover:bg-purple4/20'
+              >
+                <ChevronLeft className='w-5 h-5' />
+              </Button>
+            )}
+            <h2 className='text-gray-200 font-semibold flex items-center gap-2 text-center'>
+              <Bot className='w-5 h-5' />
+              Zuni Assistant
+            </h2>
           </div>
-          <div className='flex gap-2'>
+          <div className='flex items-center gap-2'>
             <Button
               variant='ghost'
               size='icon'
-              onClick={createNewChat}
-              className='text-purple4 hover:text-white hover:bg-purple4/20'
+              onClick={handleNewChat}
+              className='text-gray-300 hover:bg-purple4/20'
             >
               <Plus className='w-5 h-5' />
             </Button>
+            {!showHistory && threads.length > 0 && (
+              <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant='ghost' size='icon' className='text-gray-300 hover:bg-purple4/20'>
+                    <History className='w-5 h-5' />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className='w-80 p-0 bg-purple1 border-purple3 text-white'
+                  align='end'
+                  sideOffset={5}
+                >
+                  <div className='p-4 border-b border-purple3'>
+                    <Button
+                      variant='ghost'
+                      className='w-full justify-start gap-2 text-gray-300 hover:bg-purple3/30'
+                      onClick={() => {
+                        handleNewChat();
+                        setIsHistoryOpen(false);
+                      }}
+                    >
+                      <Plus className='w-4 h-4' />
+                      New Chat
+                    </Button>
+                  </div>
+                  <div className='flex flex-col gap-2 max-h-[600px] overflow-y-auto p-4'>
+                    {threads.map((thread) => (
+                      <div
+                        key={thread.thread_id}
+                        onClick={() => {
+                          handleSelectThread(thread);
+                          setIsHistoryOpen(false);
+                        }}
+                        className={cn(
+                          'flex items-center gap-3 p-3 hover:bg-purple3/30 rounded-lg cursor-pointer group',
+                          {
+                            'border border-purple4': currentThread?.thread_id === thread.thread_id
+                          }
+                        )}
+                      >
+                        <MessageSquare className='w-4 h-4 text-gray-300 flex-shrink-0' />
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-white text-sm font-medium truncate'>{thread.thread_name}</p>
+                          <p className='text-xs text-gray-400'>
+                            {format(thread.updated_at * 1000, 'MMM d, yyyy HH:mm')}
+                          </p>
+                        </div>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400'
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // handle delete
+                          }}
+                        >
+                          <Trash2 className='w-4 h-4' />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
             <Button
               variant='ghost'
               size='icon'
+              className='text-gray-300 hover:bg-purple4/20'
               onClick={onClose}
-              className='text-purple4 hover:text-white hover:bg-purple4/20'
             >
               <X className='w-5 h-5' />
             </Button>
           </div>
         </div>
 
-        {/* Chat List or Current Chat */}
-        {showChatList ? (
-          <div className='flex-1 overflow-y-auto p-2'>
-            {chats.map((chat) => (
-              <div
-                key={chat.id}
-                className='flex items-center justify-between p-3 hover:bg-purple3/30 rounded-lg cursor-pointer group'
-                onClick={() => {
-                  setCurrentChat(chat);
-                  setShowChatList(false);
-                }}
-              >
-                <div className='flex items-center gap-2'>
-                  <MessageSquare className='w-4 h-4 text-purple4' />
-                  {isRenaming === chat.id ? (
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleRename(chat.id);
-                      }}
-                    >
-                      <Input
-                        value={newTitle}
-                        onChange={(e) => setNewTitle(e.target.value)}
-                        className='h-6 py-1 px-2 text-sm'
-                        autoFocus
-                      />
-                    </form>
-                  ) : (
-                    <span>{chat.title}</span>
-                  )}
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant='ghost' size='icon' className='opacity-0 group-hover:opacity-100 h-8 w-8'>
-                      <MoreVertical className='w-4 h-4' />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => startRenaming(chat)}>
-                      <Edit2 className='w-4 h-4 mr-2' />
-                      Rename
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => deleteChat(chat.id)} className='text-red-500'>
-                      <Trash2 className='w-4 h-4 mr-2' />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ))}
-            {chats.length === 0 && (
-              <div className='text-center text-purple4/60 mt-8'>
-                <p>No chats yet</p>
-                <Button
-                  variant='ghost'
-                  onClick={createNewChat}
-                  className='mt-2 text-purple4 hover:text-white'
-                >
-                  <Plus className='w-4 h-4 mr-2' />
-                  Create new chat
-                </Button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <ChatMessages chat={currentChat} />
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Separate component for chat messages
-const ChatMessages: IComponent<{ chat: Chat | null }> = ({ chat }) => {
-  const [input, setInput] = useState('');
-
-  if (!chat) return null;
-
-  return (
-    <>
-      <div className='flex-1 overflow-y-auto p-4 space-y-4'>
-        {chat.messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`${
-              msg.isUser ? 'ml-auto bg-purple4' : 'mr-auto bg-purple3'
-            } max-w-[80%] rounded-lg p-3 text-white`}
-          >
-            {msg.text}
-          </div>
-        ))}
-      </div>
-      <div className='p-4 border-t border-purple3'>
-        <form className='relative'>
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder='Type your trading command...'
-            className='pr-10 bg-purple3/50 border-purple4/50 text-white placeholder-purple4/50'
-          />
-          <Button
-            type='submit'
-            variant='ghost'
-            size='icon'
-            className='absolute right-2 top-1/2 -translate-y-1/2 text-purple4 hover:text-white hover:bg-purple4/20'
-          >
-            <Send className='w-4 h-4' />
-          </Button>
-        </form>
+        <ThreadDetails
+          thread={currentThread}
+          messages={messages}
+          isLoading={isLoading}
+          onSendMessage={handleSendMessage}
+        />
       </div>
     </>
   );

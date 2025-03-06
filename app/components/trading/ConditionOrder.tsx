@@ -60,7 +60,7 @@ const TriggerPrice: IComponent<{
   );
 };
 
-export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => {
+export const ConditionOrder: IComponent<ConditionOrderProps> = ({ orderType }) => {
   const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
   const [amount, setAmount] = useState('');

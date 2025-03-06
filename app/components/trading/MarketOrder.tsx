@@ -13,7 +13,7 @@ import { BaseOrder } from './BaseOrder';
 import { useOrderSide } from './OrderWrapper';
 import { StableCoinSection } from './StableCoin';
 
-export const MarketOrder: React.FC = () => {
+export const MarketOrder: IComponent = () => {
   const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
   const [amount, setAmount] = useState('');

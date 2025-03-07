@@ -1,9 +1,9 @@
 import type React from 'react';
-import { useState } from 'react';
-import { ChatInput } from './components/ChatInput';
-import { ChatMessages } from './components/ChatMessages';
-import { ExampleCards } from './components/ExampleCards';
-import { WelcomeHeader } from './components/WelcomeHeader';
+import { useCallback, useState } from 'react';
+import { ChatInput } from './ChatInput';
+import { ChatMessages } from './ChatMessages';
+import { ExampleCards } from './ExampleCards';
+import { WelcomeHeader } from './WelcomeHeader';
 
 interface ThreadDetailsProps {
   thread: Thread | null;
@@ -28,9 +28,9 @@ export const ThreadDetails: IComponent<ThreadDetailsProps> = ({
     setInput('');
   };
 
-  const handleExampleClick = (example: string) => {
+  const handleExampleClick = useCallback((example: string) => {
     setInput(example);
-  };
+  }, []);
 
   return (
     <div className='flex flex-col h-full'>

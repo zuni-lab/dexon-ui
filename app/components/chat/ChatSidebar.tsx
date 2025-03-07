@@ -59,9 +59,12 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({ onClose, className }
     }
   }, [threads]);
 
-  const handleSelectThread = useCallback((thread: Thread) => {
+  const handleSelectThread = useCallback(async (thread: Thread) => {
     setCurrentThread(thread);
     setShowHistory(false);
+    await queryClient.invalidateQueries({
+      queryKey: ['chat', 'thread', thread.thread_id, address]
+    });
   }, []);
 
   const handleSendMessage = async (message: string) => {
@@ -113,7 +116,6 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({ onClose, className }
               </Button>
             )}
             <h2 className='text-gray-200 font-semibold flex items-center gap-2 text-center'>
-              <Bot className='w-5 h-5' />
               Zuni Assistant
             </h2>
           </div>

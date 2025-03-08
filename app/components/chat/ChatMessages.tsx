@@ -1,4 +1,3 @@
-import { Skeleton } from "@/components/shadcn/Skeleton";
 import { parseOrderDetails, parseUnknownMessage } from "@/utils/order";
 import { cn } from "@/utils/shadcn";
 import { format } from "date-fns";
@@ -57,15 +56,18 @@ const BotMessage: IComponent<{ message: ChatMessage; isTyping?: boolean }> = ({
     // cannot parse order details
   }
 
-  const msg = parseUnknownMessage(message.text);
+  const parsedMessage = parseUnknownMessage(message.text);
 
   return renderWrapper(
-    <div className="rounded-2xl bg-purple4/40 px-4 py-2 font-medium">
-      {!msg.beAbleOrder ? (
-        <p>{msg.text}</p>
-      ) : (
-        <Skeleton className="h-4 w-4/5" />
+    <div
+      className={cn("rounded-2xl px-4 py-2 font-medium", {
+        "bg-purple4/40": parsedMessage.text,
+      })}
+    >
+      {isTyping && parsedMessage.beAbleOrder && (
+        <p className="animate-pulse">▊</p>
       )}
+      {!parsedMessage.beAbleOrder && <p>{parsedMessage.text}</p>}
       <span className="mt-1 block text-xs opacity-70">
         {format(message.created_at * 1000, "HH:mm")}
       </span>

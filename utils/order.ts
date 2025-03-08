@@ -31,21 +31,13 @@ export function parseOrderDetails(jsonString: string): OrderDetails | null {
   }
 }
 
-const beAbleOrderRegex = [
-  "trigger_condition",
-  "trigger_price",
-  "token_name",
-  "amount",
-  "order_side",
-];
-
 export function parseUnknownMessage(jsonString: string): {
   text: string | null;
   beAbleOrder?: boolean;
 } {
   const trimmed = trimMessage(jsonString);
   try {
-    const isOrder = beAbleOrderRegex.some((key) => trimmed.includes(key));
+    const isOrder = trimmed.startsWith("{");
     if (isOrder) {
       return {
         text: null,

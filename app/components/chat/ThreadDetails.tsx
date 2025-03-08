@@ -47,7 +47,7 @@ export const ThreadDetails: IComponent<ThreadDetailsProps> = ({
   }, []);
 
   return (
-    <div className="flex h-full scroll-m-0 flex-col overflow-hidden">
+    <div className="scrollable flex h-full scroll-m-0 flex-col overflow-hidden">
       <div className="mb-4 flex-1 overflow-y-auto p-4">
         {!thread && !typingMessage ? (
           <div className="space-y-4">

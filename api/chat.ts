@@ -23,27 +23,32 @@ export const chatService = {
     threadId?: string;
     userAddress: string;
   }) {
-    const response = await fetch(
-      `${ProjectENV.NEXT_PUBLIC_API_URL}/api/chat/dex`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "text/event-stream",
+    try {
+      const response = await fetch(
+        `${ProjectENV.NEXT_PUBLIC_API_URL}/api/chat/dex`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+          },
+          body: JSON.stringify({
+            message: data.message,
+            thread_id: data.threadId,
+            user_address: data.userAddress,
+          }),
         },
-        body: JSON.stringify({
-          message: data.message,
-          thread_id: data.threadId,
-          user_address: data.userAddress,
-        }),
-      },
-    );
+      );
 
-    if (!response.body) {
-      throw new Error("No response body from server");
+      if (!response.body) {
+        throw new Error("No response body from server");
+      }
+
+      return response.body;
+    } catch (error) {
+      console.error("Error sending message:", error);
+      throw error;
     }
-
-    return response.body;
   },
 
   async listThreads(data: ListThreadsRequest): Promise<ListThreadsResponse> {

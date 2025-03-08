@@ -22,7 +22,7 @@ export const PriceChart: IComponent<{
         src={`https://www.geckoterminal.com/eth/pools/${pools[token]}?embed=1&info=0&swaps=0&grayscale=0&light_chart=0&chart_type=price&resolution=1d`}
         allow="clipboard-write"
         allowFullScreen
-        className="rounded-2xl"
+        className="rounded-xl"
       />
     </div>
   );

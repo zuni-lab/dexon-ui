@@ -87,9 +87,9 @@ export const ChatMessages: IComponent<ChatMessagesProps> = ({
   <div className="space-y-4">
     {messages.map((message) =>
       message.role === "assistant" ? (
-        <BotMessage key={message.created_at} message={message} />
+        <BotMessage key={`${message.created_at}-assistant`} message={message} />
       ) : (
-        <UserMessage key={message.created_at} message={message} />
+        <UserMessage key={`${message.created_at}-user`} message={message} />
       ),
     )}
     {newUserMessage && (

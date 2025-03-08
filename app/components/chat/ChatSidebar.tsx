@@ -10,7 +10,7 @@ import {
 import { cn } from "@/utils/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { last } from "lodash";
+
 import {
   ChevronLeft,
   History,
@@ -277,7 +277,11 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
               <Plus className="h-5 w-5" />
             </Button>
             {!showHistory && threads.length > 0 && (
-              <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+              <Popover
+                open={isHistoryOpen}
+                onOpenChange={setIsHistoryOpen}
+                modal={true}
+              >
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
@@ -288,13 +292,13 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-80 border-purple3 bg-purple1 p-0 text-white"
+                  className="w-80 overflow-y-auto border-purple3 bg-purple1 p-0 text-white"
                   align="end"
                   sideOffset={5}
                 >
                   <div className="border-purple3 border-b p-4">
                     <Button
-                      variant="ghost"
+                      variant={"ghost"}
                       className="w-full justify-start gap-2 text-gray-300 hover:bg-purple3/30"
                       onClick={() => {
                         handleNewChat();
@@ -305,17 +309,22 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                       New Chat
                     </Button>
                   </div>
-                  <div className="flex max-h-[600px] flex-col gap-2 overflow-y-auto p-4">
+                  <div className="mb-4 max-h-[500px] space-y-2 overflow-y-auto p-4">
                     {threads.map((thread) => (
-                      <button
-                        type="button"
+                      <div
                         key={thread.thread_id}
                         onClick={() => {
                           handleSelectThread(thread);
                           setIsHistoryOpen(false);
                         }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSelectThread(thread);
+                            setIsHistoryOpen(false);
+                          }
+                        }}
                         className={cn(
-                          "group flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-purple3/30",
+                          "group flex cursor-pointer items-center justify-start gap-3 rounded-lg p-3 hover:bg-purple3/30",
                           {
                             "border border-purple4":
                               currentThread?.thread_id === thread.thread_id,
@@ -327,7 +336,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                           <p className="truncate font-medium text-sm text-white">
                             {thread.thread_name}
                           </p>
-                          <p className="text-gray-400 text-xs">
+                          <p className="text-left text-gray-400 text-xs">
                             {format(
                               thread.updated_at * 1000,
                               "MMM d, yyyy HH:mm",
@@ -345,7 +354,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </button>
+                      </div>
                     ))}
                   </div>
                 </PopoverContent>

@@ -73,8 +73,10 @@ export const OrderPreview: IComponent<{
             </span>
           </div>
         </div>
-        <div className="mt-6 pt-3">
-          <span className="text-sm">{format(timestamp * 1000, "HH:mm")}</span>
+        <div>
+          <span className="text-gray-400 text-sm">
+            {format(timestamp * 1000, "HH:mm")}
+          </span>
         </div>
       </div>
     </div>

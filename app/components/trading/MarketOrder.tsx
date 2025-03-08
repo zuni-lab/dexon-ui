@@ -1,43 +1,43 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/shadcn/Button';
-import { Tokens } from '@/constants/tokens';
-import { useHandleSwap } from '@/hooks/useHandleSwap';
-import { useQuotePrice } from '@/hooks/useQuotePrice';
-import { useSelectedToken } from '@/state/token';
-import { ChevronRight } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { erc20Abi, zeroAddress } from 'viem';
-import { useAccount, useReadContract } from 'wagmi';
-import { BaseOrder } from './BaseOrder';
-import { useOrderSide } from './OrderWrapper';
-import { StableCoinSection } from './StableCoin';
+import { Button } from "@/components/shadcn/Button";
+import { Tokens } from "@/constants/tokens";
+import { useHandleSwap } from "@/hooks/useHandleSwap";
+import { useQuotePrice } from "@/hooks/useQuotePrice";
+import { useSelectedToken } from "@/state/token";
+import { ChevronRight } from "lucide-react";
+import { useCallback, useState } from "react";
+import { erc20Abi, zeroAddress } from "viem";
+import { useAccount, useReadContract } from "wagmi";
+import { BaseOrder } from "./BaseOrder";
+import { useOrderSide } from "./OrderWrapper";
+import { StableCoinSection } from "./StableCoin";
 
 export const MarketOrder: IComponent = () => {
   const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState("");
   const { token: selectedToken } = useSelectedToken();
   const token = Tokens[selectedToken];
 
   const { data: usdcBalance, refetch: refetchUsdcBalance } = useReadContract({
     abi: erc20Abi,
     address: Tokens.USDC.address,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress]
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
   });
 
   const { data: tokenBalance, refetch: refetchTokenBalance } = useReadContract({
     abi: erc20Abi,
     address: token.address,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress]
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
   });
 
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
     orderSide,
-    selectedToken: token
+    selectedToken: token,
   });
 
   const refreshBalances = useCallback(async () => {
@@ -50,7 +50,7 @@ export const MarketOrder: IComponent = () => {
     orderSide,
     selectedToken: token,
     usdcAmount,
-    callback: refreshBalances
+    callback: refreshBalances,
   });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,15 +71,22 @@ export const MarketOrder: IComponent = () => {
       selectedToken={token}
       isConnected={isConnected}
       renderFooter={() => (
-        <div className='bg-purple4/60 mt-4 mx-4 py-2 rounded-xl font-semibold text-lg'>
-          <Button variant='ghost' className='w-full justify-between text-white group'>
+        <div className="mx-4 mt-4 rounded-xl bg-purple4/60 py-2 font-semibold text-lg">
+          <Button
+            variant="ghost"
+            className="group w-full justify-between text-white"
+          >
             <span>Advanced Settings</span>
-            <ChevronRight className='w-4 h-4 transition-transform group-data-[state=open]:rotate-90' />
+            <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
           </Button>
         </div>
       )}
     >
-      <StableCoinSection orderSide={orderSide} usdcBalance={usdcBalance} usdcAmount={usdcAmount} />
+      <StableCoinSection
+        orderSide={orderSide}
+        usdcBalance={usdcBalance}
+        usdcAmount={usdcAmount}
+      />
     </BaseOrder>
   );
 };

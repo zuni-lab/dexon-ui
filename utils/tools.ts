@@ -1,5 +1,5 @@
-import classNames from 'classnames';
-import moment from 'moment';
+import classNames from "classnames";
+import moment from "moment";
 
 /**
  * Mapping hotkey into className package for better usage
@@ -12,21 +12,21 @@ export const formatWalletAddress = (address: string) => {
 
 export const getFomattedTimeAndDate = (inputDate: string | number) => {
   const date = moment(inputDate);
-  const formattedDate = date.format('HH:mm Do MMM');
-  return date.isValid() ? formattedDate : 'Never';
+  const formattedDate = date.format("HH:mm Do MMM");
+  return date.isValid() ? formattedDate : "Never";
 };
 
 export const getForrmattedFullDate = (inputDate: string | number) => {
   const date = moment(inputDate).utc();
-  const formattedDate = date.format('HH:mm Do MMM YYYY');
-  return date.isValid() ? formattedDate : 'Never';
+  const formattedDate = date.format("HH:mm Do MMM YYYY");
+  return date.isValid() ? formattedDate : "Never";
 };
 
 // HH, DD/MM/YYYY
 export const getFormattedDate = (inputDate: string | number) => {
   const date = moment(inputDate);
-  const formattedDate = date.format('DD-MM-YYYY');
-  return date.isValid() ? formattedDate : 'Never';
+  const formattedDate = date.format("DD-MM-YYYY");
+  return date.isValid() ? formattedDate : "Never";
 };
 
 export const toUtcTime = (date: Date) => {
@@ -55,18 +55,18 @@ export const isValidFloat = (val: string) => {
 
 export const formatNumber = (num: number) => {
   if (num === 0) {
-    return '0.0';
+    return "0.0";
   }
-  const [integer, decimal] = num.toString().split('.');
-  return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${decimal ? `.${decimal}` : ''}`;
+  const [integer, decimal] = num.toString().split(".");
+  return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}${decimal ? `.${decimal}` : ""}`;
 };
 
 export const formatReadableUsd = (value: number) => {
-  const formatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    notation: 'compact',
-    maximumFractionDigits: 2
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 2,
   });
   return formatter.format(value);
 };

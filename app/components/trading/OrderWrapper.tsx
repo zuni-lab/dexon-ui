@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { BuyIcon } from '@/components/icons/Buy';
-import { SellIcon } from '@/components/icons/Sell';
-import { Button } from '@/components/shadcn/Button';
-import { OrderSide } from '@/constants/orders';
-import { cn } from '@/utils/shadcn';
-import { createContext, use, useState } from 'react';
-import { ConditionOrder } from './ConditionOrder';
-import { MarketOrder } from './MarketOrder';
+import { BuyIcon } from "@/components/icons/Buy";
+import { SellIcon } from "@/components/icons/Sell";
+import { Button } from "@/components/shadcn/Button";
+import { OrderSide } from "@/constants/orders";
+import { cn } from "@/utils/shadcn";
+import { createContext, use, useState } from "react";
+import { ConditionOrder } from "./ConditionOrder";
+import { MarketOrder } from "./MarketOrder";
 export const OrderSideContext = createContext<OrderSide | null>(null);
 
 export const useOrderSide = () => {
   const orderSide = use(OrderSideContext);
   if (orderSide === null) {
-    throw new Error('useOrderSide must be used within an OrderWrapper');
+    throw new Error("useOrderSide must be used within an OrderWrapper");
   }
   return orderSide;
 };
@@ -27,25 +27,25 @@ export const OrderWrapper: IComponent<OrderWrapperProps> = ({ type }) => {
 
   return (
     <OrderSideContext.Provider value={orderSide}>
-      <div className='bg-purple3 h-full rounded-xl overflow-hidden flex flex-col'>
-        <div className='grid grid-cols-2 h-[52px]'>
+      <div className="flex h-full flex-col overflow-hidden rounded-xl bg-purple3">
+        <div className="grid h-[52px] grid-cols-2">
           <OrderButton
             isActive={orderSide === OrderSide.BUY}
             icon={<BuyIcon />}
             onClick={() => setOrderSide(OrderSide.BUY)}
-            text='Buy'
+            text="Buy"
           />
 
           <OrderButton
             isActive={orderSide === OrderSide.SELL}
             icon={<SellIcon />}
             onClick={() => setOrderSide(OrderSide.SELL)}
-            text='Sell'
+            text="Sell"
           />
         </div>
-        {type === 'market' && <MarketOrder />}
-        {type === 'limit' && <ConditionOrder orderType='limit' />}
-        {type === 'stop' && <ConditionOrder orderType='stop' />}
+        {type === "market" && <MarketOrder />}
+        {type === "limit" && <ConditionOrder orderType="limit" />}
+        {type === "stop" && <ConditionOrder orderType="stop" />}
       </div>
     </OrderSideContext.Provider>
   );
@@ -55,19 +55,24 @@ const OrderButton = ({
   isActive,
   icon,
   onClick,
-  text
-}: { isActive: boolean; icon: React.ReactNode; onClick: () => void; text: string }) => {
+  text,
+}: {
+  isActive: boolean;
+  icon: React.ReactNode;
+  onClick: () => void;
+  text: string;
+}) => {
   return (
     <Button
-      variant='ghost'
+      variant="ghost"
       className={cn(
-        { '!bg-transparent text-white': isActive },
-        'h-full font-semibold bg-purple2 hover:text-purple4 flex justify-center items-center gap-2.5 p-4 rounded-none transition-colors duration-150'
+        { "!bg-transparent text-white": isActive },
+        "flex h-full items-center justify-center gap-2.5 rounded-none bg-purple2 p-4 font-semibold transition-colors duration-150 hover:text-purple4",
       )}
       onClick={onClick}
     >
       {icon}
-      <span className='text-sm'>{text}</span>
+      <span className="text-sm">{text}</span>
     </Button>
   );
 };

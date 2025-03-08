@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { readContract, writeContract } from '@wagmi/core';
-import { useCallback, useState } from 'react';
-import { toast } from 'sonner';
-import { type Hex, erc20Abi, maxUint256 } from 'viem';
-import { useAccount, useConfig, usePublicClient } from 'wagmi';
+import { readContract, writeContract } from "@wagmi/core";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import { type Hex, erc20Abi, maxUint256 } from "viem";
+import { useAccount, useConfig, usePublicClient } from "wagmi";
 
 export const useApproveToken = () => {
   const [isPending, setIsPending] = useState(false);
@@ -16,14 +16,14 @@ export const useApproveToken = () => {
     async ({
       token,
       spender,
-      amount
+      amount,
     }: {
       token: Hex;
       spender: Hex;
       amount: bigint;
     }) => {
       if (!address || !publicClient) {
-        toast.error('Please connect your wallet');
+        toast.error("Please connect your wallet");
         return;
       }
 
@@ -33,32 +33,32 @@ export const useApproveToken = () => {
         const allowance = await readContract(config, {
           abi: erc20Abi,
           address: token,
-          functionName: 'allowance',
-          args: [address, spender]
+          functionName: "allowance",
+          args: [address, spender],
         });
         if (allowance < amount) {
           const approveTx = await writeContract(config, {
             abi: erc20Abi,
             address: token,
-            functionName: 'approve',
-            args: [spender, maxUint256]
+            functionName: "approve",
+            args: [spender, maxUint256],
           });
 
           await publicClient.waitForTransactionReceipt({
-            hash: approveTx
+            hash: approveTx,
           });
-          toast.success('Token approval confirmed');
+          toast.success("Token approval confirmed");
         }
-      } catch (error) {
-        toast.error('Failed to approve token');
+      } catch (_error) {
+        toast.error("Failed to approve token");
         setIsPending(false);
       }
     },
-    [address, config, publicClient]
+    [address, config, publicClient],
   );
 
   return {
     approveToken,
-    isPending
+    isPending,
   };
 };

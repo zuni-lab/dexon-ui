@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { UNISWAP_SWAP_ROUTER_ABI } from '@/abi/uniswapV3';
-import { UNISWAP_SWAP_ROUTER_ADDRESS } from '@/constants/contracts';
-import { OrderSide } from '@/constants/orders';
-import { Tokens } from '@/constants/tokens';
-import { findPaths } from '@/utils/dex';
-import { writeContract } from '@wagmi/core';
-import { useCallback, useState } from 'react';
-import { toast } from 'sonner';
-import { maxUint256, parseUnits } from 'viem';
-import { useAccount, useConfig, usePublicClient } from 'wagmi';
-import { useApproveToken } from './useApproveToken';
+import { UNISWAP_SWAP_ROUTER_ABI } from "@/abi/uniswapV3";
+import { UNISWAP_SWAP_ROUTER_ADDRESS } from "@/constants/contracts";
+import { OrderSide } from "@/constants/orders";
+import { Tokens } from "@/constants/tokens";
+import { findPaths } from "@/utils/dex";
+import { writeContract } from "@wagmi/core";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import { maxUint256, parseUnits } from "viem";
+import { useAccount, useConfig, usePublicClient } from "wagmi";
+import { useApproveToken } from "./useApproveToken";
 
 interface UseHandleSwapProps {
   amount: string;
@@ -25,7 +25,7 @@ export const useHandleSwap = ({
   orderSide,
   selectedToken,
   usdcAmount,
-  callback
+  callback,
 }: UseHandleSwapProps) => {
   const [isPending, setIsPending] = useState(false);
   const { address } = useAccount();
@@ -35,12 +35,12 @@ export const useHandleSwap = ({
 
   const handleSwap = useCallback(async () => {
     if (!address || !publicClient) {
-      toast.error('Please connect your wallet');
+      toast.error("Please connect your wallet");
       return;
     }
 
     if (!amount || Number(amount) === 0) {
-      toast.error('Please enter a valid amount');
+      toast.error("Please enter a valid amount");
       return;
     }
 
@@ -54,14 +54,14 @@ export const useHandleSwap = ({
         await approveToken({
           token: Tokens.USDC.address,
           spender: UNISWAP_SWAP_ROUTER_ADDRESS,
-          amount: useAmount
+          amount: useAmount,
         });
       } else {
         const useAmount = parseUnits(amount, selectedToken.decimals);
         await approveToken({
           token: selectedToken.address,
           spender: UNISWAP_SWAP_ROUTER_ADDRESS,
-          amount: useAmount
+          amount: useAmount,
         });
       }
 
@@ -74,50 +74,60 @@ export const useHandleSwap = ({
         swapTx = await writeContract(config, {
           address: UNISWAP_SWAP_ROUTER_ADDRESS,
           abi: UNISWAP_SWAP_ROUTER_ABI,
-          functionName: 'exactOutput',
+          functionName: "exactOutput",
           args: [
             {
               path,
               amountOut: swapAmount,
               recipient: address,
-              amountInMaximum: maxUint256
-            }
-          ]
+              amountInMaximum: maxUint256,
+            },
+          ],
         });
       } else {
         swapTx = await writeContract(config, {
           address: UNISWAP_SWAP_ROUTER_ADDRESS,
           abi: UNISWAP_SWAP_ROUTER_ABI,
-          functionName: 'exactInput',
+          functionName: "exactInput",
           args: [
             {
               path,
               amountIn: swapAmount,
               recipient: address,
-              amountOutMinimum: BigInt(0)
-            }
-          ]
+              amountOutMinimum: BigInt(0),
+            },
+          ],
         });
       }
 
       // Wait for swap transaction
       await publicClient.waitForTransactionReceipt({
-        hash: swapTx
+        hash: swapTx,
       });
 
-      toast.success('Swap executed successfully!');
+      toast.success("Swap executed successfully!");
 
       setIsPending(false);
 
       callback?.();
-    } catch (error) {
-      toast.error('Failed to execute swap');
+    } catch (_error) {
+      toast.error("Failed to execute swap");
       setIsPending(false);
     }
-  }, [address, amount, approveToken, config, orderSide, publicClient, selectedToken, usdcAmount, callback]);
+  }, [
+    address,
+    amount,
+    approveToken,
+    config,
+    orderSide,
+    publicClient,
+    selectedToken,
+    usdcAmount,
+    callback,
+  ]);
 
   return {
     handleSwap,
-    isPending
+    isPending,
   };
 };

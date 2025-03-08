@@ -1,5 +1,5 @@
-import uniqueId from 'lodash/uniqueId';
-import { type MutableRefObject, useEffect, useRef, useState } from 'react';
+import uniqueId from "lodash/uniqueId";
+import { type MutableRefObject, useEffect, useRef, useState } from "react";
 
 const delay = (time: number) => new Promise((res) => setTimeout(res, time));
 
@@ -19,7 +19,7 @@ const useActionThreshold = (
   /**
    * Only trigger once if true
    */
-  once = false
+  once = false,
 ): {
   onAction: (action: () => Promise<void> | void) => Promise<void>;
   refresh: () => void;
@@ -29,7 +29,9 @@ const useActionThreshold = (
    * Call each time user make an actions to update ready state
    * @param {function} action
    */
-  const onAction = async (action: () => Promise<void> | void): Promise<void> => {
+  const onAction = async (
+    action: () => Promise<void> | void,
+  ): Promise<void> => {
     if (!ready) {
       return;
     }
@@ -57,7 +59,7 @@ const useActionThreshold = (
  */
 const useActionDebounce = (
   debounceTime = 500,
-  clearWhenCallAgain = false
+  clearWhenCallAgain = false,
 ): ((_action: () => Promise<void> | void) => void) => {
   /**
    * @type action
@@ -65,13 +67,13 @@ const useActionDebounce = (
 
   // biome-ignore lint/complexity/noBannedTypes: <explanation>
   let action: Function | null;
-  const [id] = useState(uniqueId('debounce_'));
+  const [id] = useState(uniqueId("debounce_"));
 
   /**
    * Call current stored action
    */
   const doAction = async (): Promise<void> => {
-    if (typeof action === 'function') {
+    if (typeof action === "function") {
       await action();
     }
     const timeOut = timeoutIDs[id];
@@ -86,7 +88,9 @@ const useActionDebounce = (
    * On receive action
    * @param _action
    */
-  const onAction = (_action: () => Promise<void> | void = async (): Promise<void> => undefined): void => {
+  const onAction = (
+    _action: () => Promise<void> | void = async (): Promise<void> => undefined,
+  ): void => {
     action = _action;
     if (clearWhenCallAgain) {
       const timeOut = timeoutIDs[id];

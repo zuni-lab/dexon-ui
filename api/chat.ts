@@ -1,4 +1,5 @@
-import { apiClient } from './axios';
+import { ProjectENV } from "@env";
+import { apiClient } from "./axios";
 
 interface ListThreadsRequest {
   user_address: string;
@@ -17,30 +18,47 @@ interface ThreadDetailsRequest {
 }
 
 export const chatService = {
-  async sendMessage(data: { message: string; threadId?: string; userAddress: string }) {
-    return apiClient.post(
-      '/api/chat/dex',
+  async sendMessage(data: {
+    message: string;
+    threadId?: string;
+    userAddress: string;
+  }) {
+    const response = await fetch(
+      `${ProjectENV.NEXT_PUBLIC_API_URL}/api/chat/dex`,
       {
-        message: data.message,
-        thread_id: data.threadId,
-        user_address: data.userAddress
-      },
-      {
-        responseType: 'text',
+        method: "POST",
         headers: {
-          Accept: 'text/event-stream'
-        }
-      }
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+        },
+        body: JSON.stringify({
+          message: data.message,
+          thread_id: data.threadId,
+          user_address: data.userAddress,
+        }),
+      },
     );
+
+    if (!response.body) {
+      throw new Error("No response body from server");
+    }
+
+    return response.body;
   },
 
   async listThreads(data: ListThreadsRequest): Promise<ListThreadsResponse> {
-    const res = await apiClient.post<ListThreadsResponse>('/api/chat/dex/thread/list', data);
+    const res = await apiClient.post<ListThreadsResponse>(
+      "/api/chat/dex/thread/list",
+      data,
+    );
     return res.data;
   },
 
   async getThreadDetails(data: ThreadDetailsRequest): Promise<ThreadDetails> {
-    const res = await apiClient.post<ThreadDetails>('/api/chat/dex/thread', data);
+    const res = await apiClient.post<ThreadDetails>(
+      "/api/chat/dex/thread",
+      data,
+    );
     return res.data;
-  }
+  },
 };

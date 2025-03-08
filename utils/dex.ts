@@ -1,21 +1,31 @@
-import { UNISWAP_V3_POOLS } from '@/constants/contracts';
-import { type Hex, encodePacked } from 'viem';
+import { UNISWAP_V3_POOLS } from "@/constants/contracts";
+import { type Hex, encodePacked } from "viem";
 
 function isTokenInPool(pool: Pool, token: Hex): boolean {
   return pool.token0.address === token || pool.token1.address === token;
 }
 
 function getOtherToken(pool: Pool, token: Hex): Hex {
-  return pool.token0.address === token ? pool.token1.address : pool.token0.address;
+  return pool.token0.address === token
+    ? pool.token1.address
+    : pool.token0.address;
 }
 
 export function findPaths(tokenIn: Hex, tokenOut: Hex, maxHops = 2): Hex {
-  let paths: Hex = '0x';
+  let paths: Hex = "0x";
 
-  function findPathRecursive(poolPaths: Pool[], tokenPaths: Hex[], currentToken: Hex, depth: number) {
+  function findPathRecursive(
+    poolPaths: Pool[],
+    tokenPaths: Hex[],
+    currentToken: Hex,
+    depth: number,
+  ) {
     if (currentToken === tokenOut && poolPaths.length > 0) {
       for (let i = 0; i < poolPaths.length; i++) {
-        paths = encodePacked(['bytes', 'uint24', 'address'], [paths, poolPaths[i].fee, tokenPaths[i]]);
+        paths = encodePacked(
+          ["bytes", "uint24", "address"],
+          [paths, poolPaths[i].fee, tokenPaths[i]],
+        );
       }
       return;
     }
@@ -42,7 +52,8 @@ export function findPaths(tokenIn: Hex, tokenOut: Hex, maxHops = 2): Hex {
   }
 
   const startPool = UNISWAP_V3_POOLS.find(
-    (pool) => pool.token0.address === tokenIn || pool.token1.address === tokenIn
+    (pool) =>
+      pool.token0.address === tokenIn || pool.token1.address === tokenIn,
   );
 
   if (!startPool) {
@@ -50,7 +61,9 @@ export function findPaths(tokenIn: Hex, tokenOut: Hex, maxHops = 2): Hex {
   }
 
   const startToken =
-    startPool.token0.address === tokenIn ? startPool.token0.address : startPool.token1.address;
+    startPool.token0.address === tokenIn
+      ? startPool.token0.address
+      : startPool.token1.address;
 
   paths = startToken;
   findPathRecursive([], [], tokenIn, 0);

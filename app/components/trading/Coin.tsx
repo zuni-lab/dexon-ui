@@ -1,8 +1,9 @@
-import { InputProps } from '@/components/shadcn/Input';
-import { cn } from '@/utils/shadcn';
-import React, { ButtonHTMLAttributes } from 'react';
+import { InputProps } from "@/components/shadcn/Input";
+import { cn } from "@/utils/shadcn";
+import React, { ButtonHTMLAttributes } from "react";
 
-export interface CoinProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface CoinProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   symbol: string;
   icon: React.ReactNode;
 }
@@ -12,15 +13,15 @@ export const Coin = React.forwardRef<HTMLButtonElement, CoinProps>(
     return (
       <button
         className={cn(
-          'px-3 py-2 bg-purple3 rounded-xl flex items-center gap-2 transition-colors cursor-pointer',
-          className
+          "flex cursor-pointer items-center gap-2 rounded-xl bg-purple3 px-3 py-2 transition-colors",
+          className,
         )}
         ref={ref}
         {...props}
       >
         {icon}
-        <span className='text-white font-semibold'>{symbol}</span>
+        <span className="font-semibold text-white">{symbol}</span>
       </button>
     );
-  }
+  },
 );

@@ -1,12 +1,12 @@
-import 'server-only';
+import "server-only";
 
-import { merge } from 'lodash';
+import { merge } from "lodash";
 
-import type { Locale } from './i18n-config';
-import FallbackLocale from './locales/en.json';
+import type { Locale } from "./i18n-config";
+import FallbackLocale from "./locales/en.json";
 
 const dictionaries = {
-  default: () => import('./locales/en.json').then((module) => module.default)
+  default: () => import("./locales/en.json").then((module) => module.default),
 };
 
 /**
@@ -14,7 +14,7 @@ const dictionaries = {
  */
 export const getLocale = async (locale: Locale) => {
   const defaultDict = await dictionaries.default();
-  const lang = locale.split('-')[0];
+  const lang = locale.split("-")[0];
   if (lang in dictionaries) {
     return merge({}, defaultDict);
   }

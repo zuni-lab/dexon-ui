@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { Input } from '@/components/shadcn/Input';
-import { OrderSide, TriggerEnum } from '@/constants/orders';
-import { Tokens, TokensUI } from '@/constants/tokens';
-import { usePlaceOrder } from '@/hooks/usePlaceOrder';
-import { useQuotePrice } from '@/hooks/useQuotePrice';
-import { useSelectedToken } from '@/state/token';
-import { cn } from '@/utils/shadcn';
-import { useState } from 'react';
-import { erc20Abi, zeroAddress } from 'viem';
-import { useAccount, useReadContract } from 'wagmi';
-import { BaseOrder } from './BaseOrder';
-import { Coin } from './Coin';
-import { useOrderSide } from './OrderWrapper';
-import { StableCoinSection } from './StableCoin';
+import { Input } from "@/components/shadcn/Input";
+import { OrderSide, TriggerEnum } from "@/constants/orders";
+import { Tokens, TokensUI } from "@/constants/tokens";
+import { usePlaceOrder } from "@/hooks/usePlaceOrder";
+import { useQuotePrice } from "@/hooks/useQuotePrice";
+import { useSelectedToken } from "@/state/token";
+import { cn } from "@/utils/shadcn";
+import { useState } from "react";
+import { erc20Abi, zeroAddress } from "viem";
+import { useAccount, useReadContract } from "wagmi";
+import { BaseOrder } from "./BaseOrder";
+import { Coin } from "./Coin";
+import { useOrderSide } from "./OrderWrapper";
+import { StableCoinSection } from "./StableCoin";
 
 interface ConditionOrderProps {
-  orderType: Exclude<OrderType, 'market' | 'twap'>;
+  orderType: Exclude<OrderType, "market" | "twap">;
 }
 
 const TriggerPrice: IComponent<{
@@ -25,52 +25,56 @@ const TriggerPrice: IComponent<{
   setTriggerPrice: (value: string) => void;
 }> = ({ triggerCondition, triggerPrice, setTriggerPrice }) => {
   return (
-    <div className='flex flex-col py-4'>
-      <div className='flex items-center justify-between px-4'>
-        <p className='text-sm font-semibold flex items-center'>
+    <div className="flex flex-col py-4">
+      <div className="flex items-center justify-between px-4">
+        <p className="flex items-center font-semibold text-sm">
           When price
           <span
             className={cn(
-              'ml-1 bg-gradient-to-r from-green-500 to-yellow-500 text-transparent bg-clip-text font-semibold text-lg',
+              "ml-1 bg-gradient-to-r from-green-500 to-yellow-500 bg-clip-text font-semibold text-lg text-transparent",
               {
-                'from-green-500 to-yellow-500': triggerCondition === TriggerEnum.GREATER_THAN,
-                'from-red-500 to-yellow-500': triggerCondition === TriggerEnum.LESS_THAN
-              }
+                "from-green-500 to-yellow-500":
+                  triggerCondition === TriggerEnum.GREATER_THAN,
+                "from-red-500 to-yellow-500":
+                  triggerCondition === TriggerEnum.LESS_THAN,
+              },
             )}
           >
             {triggerCondition.toUpperCase()}
           </span>
         </p>
       </div>
-      <div className='relative flex items-center px-4'>
+      <div className="relative flex items-center px-4">
         <Input
-          placeholder='0.0'
+          placeholder="0.0"
           value={triggerPrice}
           onChange={(e) => setTriggerPrice(e.target.value)}
-          className='bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-16 !pr-0 py-0 pl-0 text-xl font-medium'
+          className="!pr-0 h-16 border-0 bg-transparent py-0 pl-0 font-medium text-xl focus-visible:ring-0 focus-visible:ring-offset-0"
         />
         <Coin
-          type='button'
-          symbol='USDC'
+          type="button"
+          symbol="USDC"
           icon={TokensUI.USDC.icon}
-          className='cursor-default flex-shrink-0'
+          className="flex-shrink-0 cursor-default"
         />
       </div>
     </div>
   );
 };
 
-export const ConditionOrder: IComponent<ConditionOrderProps> = ({ orderType }) => {
+export const ConditionOrder: IComponent<ConditionOrderProps> = ({
+  orderType,
+}) => {
   const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
-  const [amount, setAmount] = useState('');
-  const [triggerPrice, setTriggerPrice] = useState('');
+  const [amount, setAmount] = useState("");
+  const [triggerPrice, setTriggerPrice] = useState("");
 
   const { data: usdcBalance } = useReadContract({
     abi: erc20Abi,
     address: Tokens.USDC.address,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress]
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
   });
 
   const { token: selectedToken } = useSelectedToken();
@@ -79,14 +83,14 @@ export const ConditionOrder: IComponent<ConditionOrderProps> = ({ orderType }) =
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
     orderSide,
-    selectedToken: token
+    selectedToken: token,
   });
 
   const { data: tokenBalance, refetch: refetchTokenBalance } = useReadContract({
     abi: erc20Abi,
     address: token.address,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress]
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
   });
 
   const { placeOrder, isPending } = usePlaceOrder({
@@ -94,7 +98,7 @@ export const ConditionOrder: IComponent<ConditionOrderProps> = ({ orderType }) =
     orderSide,
     orderType,
     selectedToken: token,
-    triggerPrice
+    triggerPrice,
   });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +107,7 @@ export const ConditionOrder: IComponent<ConditionOrderProps> = ({ orderType }) =
   };
 
   const condition =
-    orderType === 'limit'
+    orderType === "limit"
       ? orderSide === OrderSide.BUY
         ? TriggerEnum.LESS_THAN
         : TriggerEnum.GREATER_THAN

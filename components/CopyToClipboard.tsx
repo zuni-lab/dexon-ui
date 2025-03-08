@@ -1,5 +1,10 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shadcn/Tooltip';
-import { useCallback, useState } from 'react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shadcn/Tooltip";
+import { useCallback, useState } from "react";
 
 export const CopyToClipboard: IComponent<{
   text: string;
@@ -17,7 +22,7 @@ export const CopyToClipboard: IComponent<{
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild className='cursor-pointer'>
+        <TooltipTrigger asChild className="cursor-pointer">
           <div
             onClick={(event) => {
               event.stopPropagation();
@@ -28,7 +33,7 @@ export const CopyToClipboard: IComponent<{
             {children}
           </div>
         </TooltipTrigger>
-        <TooltipContent>{copied ? 'Copied!' : `Copy: ${text}`} </TooltipContent>
+        <TooltipContent>{copied ? "Copied!" : `Copy: ${text}`} </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );

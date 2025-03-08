@@ -1,12 +1,12 @@
-import { Tokens } from '@/constants/tokens';
-import axios from 'axios';
+import { Tokens } from "@/constants/tokens";
+import axios from "axios";
 
 export const coingeckoClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_COINGECKO_API_URL,
   headers: {
-    accept: 'application/json',
-    'x-cg-demo-api-key': process.env.NEXT_PUBLIC_COINGECKO_API_KEY
-  }
+    accept: "application/json",
+    "x-cg-demo-api-key": process.env.NEXT_PUBLIC_COINGECKO_API_KEY,
+  },
 });
 
 export const coingeckoService = {
@@ -16,14 +16,14 @@ export const coingeckoService = {
     const to = currentTime;
 
     const params = new URLSearchParams({
-      vs_currency: 'usd',
+      vs_currency: "usd",
       from: from.toString(),
       to: to.toString(),
-      precision: '2'
+      precision: "2",
     });
 
     const response = await coingeckoClient.get<MarketChartDataResponse>(
-      `/coins/${Tokens[token].underlying}/market_chart/range?${params}`
+      `/coins/${Tokens[token].underlying}/market_chart/range?${params}`,
     );
     const { prices, total_volumes, market_caps } = response.data;
 
@@ -43,7 +43,7 @@ export const coingeckoService = {
       high24hPrice,
       low24hPrice,
       marketCap,
-      volume24h
+      volume24h,
     };
-  }
+  },
 };

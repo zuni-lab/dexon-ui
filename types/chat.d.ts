@@ -1,5 +1,7 @@
+type ChatRole = "assistant" | "user";
+
 interface ChatMessage {
-  role: 'assistant' | 'user';
+  role: ChatRole;
   text: string;
   created_at: number;
 }
@@ -13,7 +15,7 @@ interface Thread {
 }
 
 interface ThreadDetails {
-  message: ChatMessage[];
+  messages: ChatMessage[];
   thread_id: string;
   thread_name: string;
   updated_at: number;

@@ -1,7 +1,7 @@
-import { usePathname } from 'next/navigation';
+import { usePathname } from "next/navigation";
 
 export const AppRouter = {
-  Home: '/'
+  Home: "/",
 };
 
 export type RouterKey = keyof typeof AppRouter;
@@ -11,5 +11,5 @@ export const RouterMeta: Record<
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   { title: string; description?: string; icon: any }
 > = {
-  Home: { title: 'Home', description: 'HOME', icon: null }
+  Home: { title: "Home", description: "HOME", icon: null },
 };

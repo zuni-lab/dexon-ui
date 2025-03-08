@@ -1,6 +1,6 @@
-import { Button } from '@/components/shadcn/Button';
-import { Input } from '@/components/shadcn/Input';
-import { Send } from 'lucide-react';
+import { Button } from "@/components/shadcn/Button";
+import { Input } from "@/components/shadcn/Input";
+import { Send } from "lucide-react";
 
 interface ChatInputProps {
   input: string;
@@ -9,22 +9,29 @@ interface ChatInputProps {
   onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
-export const ChatInput: IComponent<ChatInputProps> = ({ input, isLoading, onChange, onSubmit }) => (
-  <div className='p-4 border-t border-purple3 bg-purple1'>
-    <form onSubmit={onSubmit} className='relative'>
+export const ChatInput: IComponent<ChatInputProps> = ({
+  input,
+  isLoading,
+  onChange,
+  onSubmit,
+}) => (
+  <div className="border-purple3 border-t bg-purple1 p-4">
+    <form onSubmit={onSubmit} className="relative">
       <Input
         value={input}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={isLoading ? 'Processing...' : 'Type your trading command...'}
+        placeholder={
+          isLoading ? "Processing..." : "Type your trading command..."
+        }
         disabled={isLoading}
-        className='pr-12 py-6 bg-purple2 border-purple3 text-white placeholder-white/50 rounded-xl text-[17px]'
+        className="rounded-xl border-purple3 bg-purple2 py-6 pr-12 text-[17px] text-white placeholder-white/50"
       />
       <Button
-        type='submit'
+        type="submit"
         disabled={isLoading}
-        className='absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-purple4/20 hover:bg-purple4/30 text-white'
+        className="-translate-y-1/2 absolute top-1/2 right-2 rounded-lg bg-purple4/20 p-2 text-white hover:bg-purple4/30"
       >
-        <Send className='w-5 h-5' />
+        <Send className="h-5 w-5" />
       </Button>
     </form>
   </div>

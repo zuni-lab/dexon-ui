@@ -1,4 +1,9 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shadcn/Tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shadcn/Tooltip";
 
 export const TooltipWrapper: IComponent<{
   text: string;
@@ -6,7 +11,7 @@ export const TooltipWrapper: IComponent<{
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild className='cursor-pointer'>
+        <TooltipTrigger asChild className="cursor-pointer">
           {children}
         </TooltipTrigger>
         <TooltipContent>{text} </TooltipContent>

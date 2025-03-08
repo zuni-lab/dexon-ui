@@ -1,16 +1,18 @@
 "use client";
 
+import { dexonService } from "@/api/dexon";
 import { DEXON_ADDRESS } from "@/constants/contracts";
 import {
   DEXON_TYPED_DATA,
-  OrderSide,
+  OrderSideMapping,
   OrderTypeMapping,
 } from "@/constants/orders";
 import { Tokens } from "@/constants/tokens";
-import { findPaths } from "@/utils/dex";
+import { findPaths, findPoolIds } from "@/utils/dex";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { maxUint256, parseUnits } from "viem";
+import { parseUnits } from "viem";
 import {
   useAccount,
   useConfig,
@@ -22,7 +24,7 @@ import { useApproveToken } from "./useApproveToken";
 interface UsePlaceOrderProps {
   amount: string;
   orderSide: OrderSide;
-  orderType: Exclude<OrderType, "market" | "twap">;
+  orderType: Exclude<OrderType, "MARKET" | "TWAP">;
   selectedToken: Token;
   triggerPrice: string;
 }
@@ -39,7 +41,17 @@ export const usePlaceOrder = ({
   const publicClient = usePublicClient();
   const config = useConfig();
   const { signTypedDataAsync } = useSignTypedData();
+
+  const queryClient = useQueryClient();
   const { approveToken } = useApproveToken();
+  const { mutateAsync: placeOrderApi } = useMutation({
+    mutationFn: (order: PlaceOrderRequest) => dexonService.placeOrder(order),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders", address, "OPEN"],
+      });
+    },
+  });
 
   const placeOrder = useCallback(async () => {
     if (!address) {
@@ -72,14 +84,14 @@ export const usePlaceOrder = ({
 
       // TODO: Make these configurable in UI
       const slippage = 0.1;
-      const deadline = maxUint256;
+      const deadline = 4102444800n;
 
       if (!publicClient) {
         throw new Error("Public client not found");
       }
 
       // Check and handle token approvals
-      if (orderSide === OrderSide.BUY) {
+      if (orderSide === "BUY") {
         const maxUsdcAmount = (
           Number(amount) *
           Number(triggerPrice) *
@@ -114,12 +126,12 @@ export const usePlaceOrder = ({
         triggerPrice: parseUnits(triggerPrice, 18),
         slippage: parseUnits(slippage.toString(), 6),
         orderType: OrderTypeMapping[orderType],
-        orderSide,
+        orderSide: OrderSideMapping[orderSide],
         deadline,
       };
 
       // Sign order with EIP-712
-      const _signature = await signTypedDataAsync({
+      const signature = await signTypedDataAsync({
         domain: {
           name: domain.name,
           version: domain.version,
@@ -131,21 +143,23 @@ export const usePlaceOrder = ({
         message: order,
       });
 
-      // TODO: Send order to backend API
-      // const response = await fetch('/api/orders', {
-      //     method: 'POST',
-      //     headers: {
-      //         'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //         order,
-      //         signature,
-      //     }),
-      // });
+      const { status } = await placeOrderApi({
+        wallet: order.account,
+        nonce: order.nonce.toString(),
+        poolIds: findPoolIds(selectedToken.address, Tokens.USDC.address),
+        side: orderSide,
+        type: orderType,
+        price: triggerPrice,
+        amount: order.amount.toString(),
+        paths: order.path,
+        deadline: Number(order.deadline),
+        slippage,
+        signature,
+      });
 
-      // if (!response.ok) {
-      //     throw new Error('Failed to submit order');
-      // }
+      if (status !== 200) {
+        throw new Error("Failed to submit order");
+      }
 
       toast.success(`${orderType} order placed successfully!`);
     } catch (_error) {
@@ -160,6 +174,7 @@ export const usePlaceOrder = ({
     config,
     orderSide,
     orderType,
+    placeOrderApi,
     publicClient,
     selectedToken,
     signTypedDataAsync,

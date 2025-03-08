@@ -18,7 +18,7 @@ export const getFomattedTimeAndDate = (inputDate: string | number) => {
 
 export const getForrmattedFullDate = (inputDate: string | number) => {
   const date = moment(inputDate).utc();
-  const formattedDate = date.format("HH:mm Do MMM YYYY");
+  const formattedDate = date.format("HH:mm MM-DD-YYYY");
   return date.isValid() ? formattedDate : "Never";
 };
 
@@ -69,4 +69,22 @@ export const formatReadableUsd = (value: number) => {
     maximumFractionDigits: 2,
   });
   return formatter.format(value);
+};
+
+export const toQueryString = (params: object) => {
+  const toSnakeCase = (str: string) =>
+    str.replace(/([A-Z])/g, "_$1").toLowerCase();
+
+  return Object.entries(params)
+    .filter(([_, value]) => value !== undefined) // Remove undefined values
+    .flatMap(([key, value]) => {
+      const snakeKey = toSnakeCase(key);
+      if (Array.isArray(value)) {
+        return value.map(
+          (v) => `${encodeURIComponent(snakeKey)}=${encodeURIComponent(v)}`,
+        );
+      }
+      return `${encodeURIComponent(snakeKey)}=${encodeURIComponent(value)}`;
+    })
+    .join("&");
 };

@@ -7,14 +7,15 @@ import {
 
 export const TooltipWrapper: IComponent<{
   text: string;
-}> = ({ text, children }) => {
+  side?: "top" | "right" | "bottom" | "left";
+}> = ({ text, children, side }) => {
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild className="cursor-pointer">
           {children}
         </TooltipTrigger>
-        <TooltipContent>{text} </TooltipContent>
+        <TooltipContent side={side}>{text}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );

@@ -1,6 +1,5 @@
-import { InputProps } from "@/components/shadcn/Input";
 import { cn } from "@/utils/shadcn";
-import React, { ButtonHTMLAttributes } from "react";
+import React from "react";
 
 export interface CoinProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {

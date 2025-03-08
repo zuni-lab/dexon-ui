@@ -10,7 +10,7 @@ export const TradingPanel: IComponent<{ className?: string }> = ({
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden rounded-2xl border border-secondary bg-primary",
+        "flex flex-col overflow-hidden rounded-2xl border border-secondary bg-primary/80 blur-0",
         className,
       )}
     >

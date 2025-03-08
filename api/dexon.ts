@@ -1,3 +1,4 @@
+import { ITEMS_PER_PAGE } from "@/constants/orders";
 import { formatAmountWithPath } from "@/utils/dex";
 import { toQueryString } from "@/utils/tools";
 import type { Hex } from "viem";
@@ -8,6 +9,11 @@ interface PaginationResponse<T> {
   total: number;
 }
 
+export type TOrder = OrderResponse & {
+  amount: number;
+  price: number;
+};
+
 export const dexonService = {
   async getOrders(params: {
     wallet: Hex;
@@ -17,23 +23,28 @@ export const dexonService = {
     notStatus?: OrderStatus[];
   }) {
     if (!params.limit) {
-      params.limit = 10;
+      params.limit = ITEMS_PER_PAGE;
     }
-    const { data } = await apiClient.get<PaginationResponse<OrderReponse>>(
-      `/orders?${toQueryString(params)}`,
+    const { data } = await apiClient.get<PaginationResponse<OrderResponse>>(
+      `/api/orders?${toQueryString(params)}`,
     );
-    const orders = data.data.map((order) => ({
-      ...order,
-      amount: Number(formatAmountWithPath(order.paths, BigInt(order.amount))),
-      price: order.price,
-    }));
+    const orders = data.data.map(
+      (order) =>
+        ({
+          ...order,
+          amount: Number(
+            formatAmountWithPath(order.paths, BigInt(order.amount)),
+          ),
+          price: order.price,
+        }) as TOrder,
+    );
     return { orders, total: data.total };
   },
-  async placeOrder(order: PlaceOrderRequest) {
-    return apiClient.post("/orders", order);
+  placeOrder(order: PlaceOrderRequest) {
+    return apiClient.post("/api/orders", order);
   },
-  async cancelOrder({ orderId, wallet }: { orderId: number; wallet: Hex }) {
-    return apiClient.post(`/orders/${orderId}/cancel`, {
+  cancelOrder({ orderId, wallet }: { orderId: number; wallet: Hex }) {
+    return apiClient.post(`/api/orders/${orderId}/cancel`, {
       wallet,
     });
   },

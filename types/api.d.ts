@@ -5,7 +5,7 @@ type OrderStatus =
   | "REJECTED"
   | "CANCELLED";
 
-interface OrderReponse {
+interface OrderResponse {
   id: number;
   wallet: `0x${string}`;
   type: OrderType;

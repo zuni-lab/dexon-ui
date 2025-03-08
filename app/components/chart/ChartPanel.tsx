@@ -11,7 +11,7 @@ export const ChartPanel: IComponent<{
   return (
     <div
       className={cn(
-        "flex flex-col divide-y divide-secondary rounded-2xl border border-secondary bg-primary/90 backdrop-blur-lg",
+        "flex flex-col divide-y divide-secondary rounded-2xl border border-secondary bg-primary/80 blur-0 backdrop-blur-lg",
         className,
       )}
     >

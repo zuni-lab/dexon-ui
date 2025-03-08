@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { determineOrderType } from "@/utils/order";
 import { cn } from "@/utils/shadcn";
 
-const orderTypeColors: Record<OrderType, string> = {
+export const orderTypeColors: Record<OrderType, string> = {
   MARKET: "bg-blue-500",
   LIMIT: "bg-yellow-500",
   STOP: "bg-red-400",

@@ -133,15 +133,9 @@
 			"**/build",
 			"**/dist",
 			"**/node_modules",
-			"**/vite.config.ts",
 			"node_modules",
 			"*.json",
-			"./src/routeTree.gen.ts",
-			"./src/components/ui/input-otp.tsx",
-			"./src/vite-env.d.ts",
-			"./src/lib/graphql/generated",
-			"./src/lib/graphql/api/generated",
-			"./src/lib/graphql/hermes/generated"
+			"./src/routeTree.gen.ts"
 		],
 		"maxSize": 3000000
 	},

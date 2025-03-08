@@ -38,7 +38,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-store-
 
-      - name: Install Dependencies and Run Eslint Checking
+      - name: Install Dependencies and Run Checking
         run: |
           bun install
           bun run format 

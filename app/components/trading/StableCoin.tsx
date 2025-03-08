@@ -1,5 +1,4 @@
 import { Input } from "@/components/shadcn/Input";
-import { OrderSide } from "@/constants/orders";
 import { Tokens, TokensUI } from "@/constants/tokens";
 import { formatNumber } from "@/utils/tools";
 import { Balance } from "./Balance";
@@ -14,7 +13,7 @@ export const StableCoinSection: IComponent<{
     <div className="flex flex-col gap-1 px-4 py-4">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-sm">
-          {orderSide === OrderSide.BUY ? "You pay" : "You receive"}
+          {orderSide === "BUY" ? "You pay" : "You receive"}
         </h2>
         <Balance balance={usdcBalance} token={Tokens.USDC} />
       </div>

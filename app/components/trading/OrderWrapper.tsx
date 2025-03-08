@@ -3,7 +3,6 @@
 import { BuyIcon } from "@/components/icons/Buy";
 import { SellIcon } from "@/components/icons/Sell";
 import { Button } from "@/components/shadcn/Button";
-import { OrderSide } from "@/constants/orders";
 import { cn } from "@/utils/shadcn";
 import { createContext, use, useState } from "react";
 import { ConditionOrder } from "./ConditionOrder";
@@ -23,29 +22,29 @@ interface OrderWrapperProps {
 }
 
 export const OrderWrapper: IComponent<OrderWrapperProps> = ({ type }) => {
-  const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.BUY);
+  const [orderSide, setOrderSide] = useState<OrderSide>("BUY");
 
   return (
     <OrderSideContext.Provider value={orderSide}>
       <div className="flex h-full flex-col overflow-hidden rounded-xl bg-purple3">
         <div className="grid h-[52px] grid-cols-2">
           <OrderButton
-            isActive={orderSide === OrderSide.BUY}
+            isActive={orderSide === "BUY"}
             icon={<BuyIcon />}
-            onClick={() => setOrderSide(OrderSide.BUY)}
+            onClick={() => setOrderSide("BUY")}
             text="Buy"
           />
 
           <OrderButton
-            isActive={orderSide === OrderSide.SELL}
+            isActive={orderSide === "SELL"}
             icon={<SellIcon />}
-            onClick={() => setOrderSide(OrderSide.SELL)}
+            onClick={() => setOrderSide("SELL")}
             text="Sell"
           />
         </div>
-        {type === "market" && <MarketOrder />}
-        {type === "limit" && <ConditionOrder orderType="limit" />}
-        {type === "stop" && <ConditionOrder orderType="stop" />}
+        {type === "MARKET" && <MarketOrder />}
+        {type === "LIMIT" && <ConditionOrder orderType="LIMIT" />}
+        {type === "STOP" && <ConditionOrder orderType="STOP" />}
       </div>
     </OrderSideContext.Provider>
   );

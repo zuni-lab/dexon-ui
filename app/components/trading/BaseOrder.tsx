@@ -2,10 +2,8 @@
 
 import { Button } from "@/components/shadcn/Button";
 import { Input } from "@/components/shadcn/Input";
-import { OrderSide } from "@/constants/orders";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { Balance } from "./Balance";
 import { TokensModal } from "./TokensModal";
 
@@ -62,7 +60,7 @@ export const BaseOrder: IComponent<BaseOrderProps> = ({
             )}
             {isPending
               ? "Submitting..."
-              : `${orderSide === OrderSide.BUY ? "Buy" : "Sell"} ${selectedToken.symbol}`}
+              : `${orderSide} ${selectedToken.symbol}`}
           </Button>
         ) : (
           <ConnectButton.Custom>

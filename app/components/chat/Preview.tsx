@@ -4,10 +4,10 @@ import { determineOrderType } from "@/utils/order";
 import { cn } from "@/utils/shadcn";
 
 const orderTypeColors: Record<OrderType, string> = {
-  market: "bg-blue-500",
-  limit: "bg-yellow-500",
-  stop: "bg-red-400",
-  twap: "bg-purple-500",
+  MARKET: "bg-blue-500",
+  LIMIT: "bg-yellow-500",
+  STOP: "bg-red-400",
+  TWAP: "bg-purple-500",
 };
 
 export const OrderPreview: IComponent<{
@@ -46,7 +46,7 @@ export const OrderPreview: IComponent<{
           <span
             className={cn(
               "rounded-md px-3 py-1.5 font-semibold text-sm",
-              order.order_side === "buy" ? "bg-green-600" : "bg-red-600",
+              order.order_side === "BUY" ? "bg-green-600" : "bg-red-600",
             )}
           >
             {order.order_side.toUpperCase()}

@@ -2,7 +2,6 @@
 
 import { UNISWAP_QUOTER_V2_ABI } from "@/abi/uniswapV3";
 import { UNISWAP_QUOTER_V2_ADDRESS } from "@/constants/contracts";
-import { OrderSide } from "@/constants/orders";
 import { Tokens } from "@/constants/tokens";
 import { findPaths } from "@/utils/dex";
 import { useEffect, useState } from "react";
@@ -39,9 +38,7 @@ export const useQuotePrice = ({
             address: UNISWAP_QUOTER_V2_ADDRESS,
             abi: UNISWAP_QUOTER_V2_ABI,
             functionName:
-              orderSide === OrderSide.BUY
-                ? "quoteExactOutput"
-                : "quoteExactInput",
+              orderSide === "BUY" ? "quoteExactOutput" : "quoteExactInput",
             args: [path, swapAmount],
           });
           const [estUsdcAmount] = result;
@@ -59,9 +56,7 @@ export const useQuotePrice = ({
           address: UNISWAP_QUOTER_V2_ADDRESS,
           abi: UNISWAP_QUOTER_V2_ABI,
           functionName:
-            orderSide === OrderSide.BUY
-              ? "quoteExactOutput"
-              : "quoteExactInput",
+            orderSide === "BUY" ? "quoteExactOutput" : "quoteExactInput",
           args: [path, swapAmount],
         });
         const [estUsdcAmount] = result;

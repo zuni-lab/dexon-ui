@@ -1,6 +1,6 @@
 export function determineOrderType(order: OrderDetails): OrderType {
   if (order.trigger_condition === "=") {
-    return "market";
+    return "MARKET";
   }
 
   // For sell orders:
@@ -11,10 +11,10 @@ export function determineOrderType(order: OrderDetails): OrderType {
   // Stop Buy: triggers when price rises above (trigger_condition: '>')
   // Limit: triggers when price falls below (trigger_condition: '<')
 
-  if (order.order_side === "sell") {
-    return order.trigger_condition === "<" ? "stop" : "limit";
+  if (order.order_side === "SELL") {
+    return order.trigger_condition === "<" ? "STOP" : "LIMIT";
   }
-  return order.trigger_condition === ">" ? "stop" : "limit";
+  return order.trigger_condition === ">" ? "STOP" : "LIMIT";
 }
 
 export function parseOrderDetails(jsonString: string): OrderDetails | null {

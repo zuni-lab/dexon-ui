@@ -2,7 +2,6 @@
 
 import { UNISWAP_SWAP_ROUTER_ABI } from "@/abi/uniswapV3";
 import { UNISWAP_SWAP_ROUTER_ADDRESS } from "@/constants/contracts";
-import { OrderSide } from "@/constants/orders";
 import { Tokens } from "@/constants/tokens";
 import { findPaths } from "@/utils/dex";
 import { writeContract } from "@wagmi/core";
@@ -48,7 +47,7 @@ export const useHandleSwap = ({
       setIsPending(true);
 
       // Check and handle token approvals
-      if (orderSide === OrderSide.BUY) {
+      if (orderSide === "BUY") {
         const maxUsdcAmount = (Number(usdcAmount) * 1.1).toString();
         const useAmount = parseUnits(maxUsdcAmount, Tokens.USDC.decimals);
         await approveToken({
@@ -70,7 +69,7 @@ export const useHandleSwap = ({
       const swapAmount = parseUnits(amount, selectedToken.decimals);
 
       let swapTx: `0x${string}`;
-      if (orderSide === OrderSide.BUY) {
+      if (orderSide === "BUY") {
         swapTx = await writeContract(config, {
           address: UNISWAP_SWAP_ROUTER_ADDRESS,
           abi: UNISWAP_SWAP_ROUTER_ABI,

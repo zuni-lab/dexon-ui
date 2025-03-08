@@ -1,22 +1,22 @@
 export const OrderRecords: Record<OrderType, string> = {
-  market: "Market",
-  limit: "Limit",
-  stop: "Stop",
-  twap: "Twap",
+  MARKET: "Market",
+  LIMIT: "Limit",
+  STOP: "Stop",
+  TWAP: "Twap",
 } as const;
 
 export const OrderTypeMapping: Record<
-  Exclude<OrderType, "market" | "twap">,
+  Exclude<OrderType, "MARKET" | "TWAP">,
   number
 > = {
-  limit: 0,
-  stop: 1,
+  LIMIT: 0,
+  STOP: 1,
 } as const;
 
-export enum OrderSide {
-  BUY = 0,
-  SELL = 1,
-}
+export const OrderSideMapping: Record<OrderSide, number> = {
+  BUY: 0,
+  SELL: 1,
+} as const;
 
 export const DEXON_TYPED_DATA = {
   Order: {

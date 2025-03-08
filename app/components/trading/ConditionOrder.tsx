@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/shadcn/Input";
-import { OrderSide, TriggerEnum } from "@/constants/orders";
+import { TriggerEnum } from "@/constants/orders";
 import { Tokens, TokensUI } from "@/constants/tokens";
 import { usePlaceOrder } from "@/hooks/usePlaceOrder";
 import { useQuotePrice } from "@/hooks/useQuotePrice";
@@ -16,7 +16,7 @@ import { useOrderSide } from "./OrderWrapper";
 import { StableCoinSection } from "./StableCoin";
 
 interface ConditionOrderProps {
-  orderType: Exclude<OrderType, "market" | "twap">;
+  orderType: Exclude<OrderType, "MARKET" | "TWAP">;
 }
 
 const TriggerPrice: IComponent<{
@@ -107,11 +107,11 @@ export const ConditionOrder: IComponent<ConditionOrderProps> = ({
   };
 
   const condition =
-    orderType === "limit"
-      ? orderSide === OrderSide.BUY
+    orderType === "LIMIT"
+      ? orderSide === "BUY"
         ? TriggerEnum.LESS_THAN
         : TriggerEnum.GREATER_THAN
-      : orderSide === OrderSide.BUY
+      : orderSide === "BUY"
         ? TriggerEnum.GREATER_THAN
         : TriggerEnum.LESS_THAN;
 

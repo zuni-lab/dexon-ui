@@ -3,4 +3,6 @@ export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
 
-export const middleware = async () => {};
+export const middleware = async () => {
+  // Do nothing
+};

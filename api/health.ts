@@ -1,7 +1,7 @@
 import { apiClient } from "./axios";
 
 export const healthService = {
-  async health() {
+  health() {
     return apiClient.get<string>("/health");
   },
 };

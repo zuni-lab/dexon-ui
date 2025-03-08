@@ -10,7 +10,7 @@ import { TransitionLayout } from "@/layouts/TransitionLayout";
 import Providers from "./provider";
 import { WrapperLayout } from "./wrapper";
 
-export async function generateStaticParams() {
+export function generateStaticParams() {
   return [{ lang: "en-US" }, { lang: "vi-VN" }];
 }
 

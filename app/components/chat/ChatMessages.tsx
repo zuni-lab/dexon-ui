@@ -53,7 +53,9 @@ const BotMessage: IComponent<{ message: ChatMessage; isTyping?: boolean }> = ({
         <OrderPreview order={orderDetails} timestamp={message.created_at} />,
       );
     }
-  } catch (_e) {}
+  } catch (_e) {
+    // cannot parse order details
+  }
 
   const msg = parseUnknownMessage(message.text);
 
@@ -83,11 +85,11 @@ export const ChatMessages: IComponent<ChatMessagesProps> = ({
   typingMessage,
 }) => (
   <div className="space-y-4">
-    {messages.map((message, index) =>
+    {messages.map((message) =>
       message.role === "assistant" ? (
-        <BotMessage key={index} message={message} />
+        <BotMessage key={message.created_at} message={message} />
       ) : (
-        <UserMessage key={index} message={message} />
+        <UserMessage key={message.created_at} message={message} />
       ),
     )}
     {newUserMessage && (

@@ -16,7 +16,7 @@ import { useState } from "react";
 import { useAccount } from "wagmi";
 
 export const ChatInterface: IComponent = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const { isConnected } = useAccount();
 
   return (

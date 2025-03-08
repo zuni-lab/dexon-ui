@@ -45,20 +45,19 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
   // Query for threads list
   const { data: threadsResponse } = useQuery({
     queryKey: ["chat", "threads", address],
-    queryFn: async () => {
-      return chatService.listThreads({
+    queryFn: () =>
+      chatService.listThreads({
         user_address: address!,
         offset: 0,
         limit: 10,
-      });
-    },
+      }),
     enabled: !!address,
   });
 
   // Query for current thread details
   const { data: threadDetails, isLoading: isLoadingDetails } = useQuery({
     queryKey: ["chat", "thread", currentThread?.thread_id, address],
-    queryFn: async () => {
+    queryFn: () => {
       if (!currentThread || !address) return null;
       return chatService.getThreadDetails({
         thread_id: currentThread.thread_id!,
@@ -83,19 +82,22 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
   //   }
   // }, [threads]);
 
-  const handleSelectThread = useCallback(async (thread: Thread) => {
-    setCurrentThread(thread);
-    setShowHistory(false);
-    await queryClient.invalidateQueries({
-      queryKey: ["chat", "thread", thread.thread_id, address],
-    });
-  }, []);
+  const handleSelectThread = useCallback(
+    async (thread: Thread) => {
+      setCurrentThread(thread);
+      setShowHistory(false);
+      await queryClient.invalidateQueries({
+        queryKey: ["chat", "thread", thread.thread_id, address],
+      });
+    },
+    [address, queryClient],
+  );
 
   const clear = useCallback(() => {
     setIsHistoryOpen(false);
     setTypingMessage(undefined);
     setNewUserMessage(undefined);
-  }, [setIsHistoryOpen, setTypingMessage, setNewUserMessage]);
+  }, []);
 
   const handleSendMessage = useCallback(
     async (message: string) => {
@@ -158,7 +160,9 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                           updated_at: Date.now() / 1000,
                         };
                       }
-                    } catch (_e) {}
+                    } catch (_e) {
+                      // handle error
+                    }
                     break;
 
                   case "message":
@@ -178,7 +182,9 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                       } else {
                         toast.error(statusData.message);
                       }
-                    } catch (_e) {}
+                    } catch (_e) {
+                      // handle error
+                    }
                     break;
                 }
               }
@@ -192,6 +198,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
           // Update thread details cache directly
           queryClient.setQueryData(
             ["chat", "thread", newThreadRef?.thread_id, address],
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             (old: any) => ({
               ...old,
               messages: [
@@ -207,6 +214,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
             }),
           );
         }
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       } catch (error: any) {
         console.error(error);
         try {
@@ -221,14 +229,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
         });
       }
     },
-    [
-      currentThread,
-      address,
-      queryClient,
-      setTypingMessage,
-      setNewUserMessage,
-      clear,
-    ],
+    [currentThread, address, queryClient, clear],
   );
 
   const handleNewChat = useCallback(() => {
@@ -245,7 +246,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
     <>
       <div
         className={cn(
-          "z-50 my-[2px] flex w-96 flex-col overflow-hidden rounded-l-xl border-purple3 border-l bg-purple2",
+          "z-50 flex w-96 flex-col overflow-hidden rounded-l-xl border-purple3 border-l bg-purple2",
           className,
         )}
       >
@@ -306,7 +307,8 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                   </div>
                   <div className="flex max-h-[600px] flex-col gap-2 overflow-y-auto p-4">
                     {threads.map((thread) => (
-                      <div
+                      <button
+                        type="button"
                         key={thread.thread_id}
                         onClick={() => {
                           handleSelectThread(thread);
@@ -343,7 +345,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </PopoverContent>

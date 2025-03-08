@@ -29,6 +29,13 @@ export const CopyToClipboard: IComponent<{
               event.preventDefault();
               copyToClipboard();
             }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.stopPropagation();
+                event.preventDefault();
+                copyToClipboard();
+              }
+            }}
           >
             {children}
           </div>

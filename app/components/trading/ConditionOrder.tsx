@@ -86,7 +86,7 @@ export const ConditionOrder: IComponent<ConditionOrderProps> = ({
     selectedToken: token,
   });
 
-  const { data: tokenBalance, refetch: refetchTokenBalance } = useReadContract({
+  const { data: tokenBalance } = useReadContract({
     abi: erc20Abi,
     address: token.address,
     functionName: "balanceOf",

@@ -135,7 +135,8 @@
 			"**/node_modules",
 			"node_modules",
 			"*.json",
-			"./src/routeTree.gen.ts"
+			"./src/routeTree.gen.ts",
+			".next"
 		],
 		"maxSize": 3000000
 	},

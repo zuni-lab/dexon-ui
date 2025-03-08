@@ -1,27 +1,13 @@
 "use client";
 
 import { chatService } from "@/api/chat";
-import { Button } from "@/components/shadcn/Button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/shadcn/Popover";
 import { cn } from "@/utils/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 
-import {
-  ChevronLeft,
-  History,
-  MessageSquare,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
+import { ChatHeader } from "./ChatHeader";
 import { ThreadDetails } from "./ThreadDetails";
 
 interface ChatSidebarProps {
@@ -34,10 +20,9 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
   className,
 }) => {
   const { address } = useAccount();
-  const [showHistory, setShowHistory] = useState(false);
   const [currentThread, setCurrentThread] = useState<Partial<Thread>>();
   const queryClient = useQueryClient();
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const [typingMessage, setTypingMessage] = useState<ChatMessage>();
   const [newUserMessage, setNewUserMessage] = useState<ChatMessage>();
@@ -85,7 +70,6 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
   const handleSelectThread = useCallback(
     async (thread: Thread) => {
       setCurrentThread(thread);
-      setShowHistory(false);
       await queryClient.invalidateQueries({
         queryKey: ["chat", "thread", thread.thread_id, address],
       });
@@ -94,7 +78,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
   );
 
   const clear = useCallback(() => {
-    setIsHistoryOpen(false);
+    setShowHistory(false);
     setTypingMessage(undefined);
     setNewUserMessage(undefined);
   }, []);
@@ -251,125 +235,15 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-purple3 border-b bg-purple1 px-4 py-3">
-          <div className="flex items-center gap-2">
-            {showHistory && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowHistory(false)}
-                className="text-gray-300 hover:bg-purple4/20"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            )}
-            <h2 className="flex items-center gap-2 text-center font-semibold text-gray-200">
-              Zuni Assistant
-            </h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleNewChat}
-              className="text-gray-300 hover:bg-purple4/20"
-            >
-              <Plus className="h-5 w-5" />
-            </Button>
-            {!showHistory && threads.length > 0 && (
-              <Popover
-                open={isHistoryOpen}
-                onOpenChange={setIsHistoryOpen}
-                modal={true}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-300 hover:bg-purple4/20"
-                  >
-                    <History className="h-5 w-5" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-80 overflow-y-auto border-purple3 bg-purple1 p-0 text-white"
-                  align="end"
-                  sideOffset={5}
-                >
-                  <div className="border-purple3 border-b p-4">
-                    <Button
-                      variant={"ghost"}
-                      className="w-full justify-start gap-2 text-gray-300 hover:bg-purple3/30"
-                      onClick={() => {
-                        handleNewChat();
-                        setIsHistoryOpen(false);
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                      New Chat
-                    </Button>
-                  </div>
-                  <div className="mb-4 max-h-[500px] space-y-2 overflow-y-auto p-4">
-                    {threads.map((thread) => (
-                      <div
-                        key={thread.thread_id}
-                        onClick={() => {
-                          handleSelectThread(thread);
-                          setIsHistoryOpen(false);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleSelectThread(thread);
-                            setIsHistoryOpen(false);
-                          }
-                        }}
-                        className={cn(
-                          "group flex cursor-pointer items-center justify-start gap-3 rounded-lg p-3 hover:bg-purple3/30",
-                          {
-                            "border border-purple4":
-                              currentThread?.thread_id === thread.thread_id,
-                          },
-                        )}
-                      >
-                        <MessageSquare className="h-4 w-4 flex-shrink-0 text-gray-300" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium text-sm text-white">
-                            {thread.thread_name}
-                          </p>
-                          <p className="text-left text-gray-400 text-xs">
-                            {format(
-                              thread.updated_at * 1000,
-                              "MMM d, yyyy HH:mm",
-                            )}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 opacity-0 hover:text-red-400 group-hover:opacity-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // handle delete
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-300 hover:bg-purple4/20"
-              onClick={onClose}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
+        <ChatHeader
+          threads={threads}
+          showHistory={showHistory}
+          currentThreadId={currentThread?.thread_id}
+          onClose={onClose}
+          handleNewChat={handleNewChat}
+          setShowHistory={setShowHistory}
+          handleSelectThread={handleSelectThread}
+        />
 
         <ThreadDetails
           thread={currentThread}

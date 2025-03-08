@@ -23,10 +23,14 @@ export const ChatInput: IComponent<ChatInputProps> = ({
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
         e.preventDefault();
-        onSubmit(e as any);
+        const formEvent = new SubmitEvent("submit", {
+          bubbles: true,
+          cancelable: true,
+        });
+        onSubmit(formEvent as unknown as React.FormEvent);
       }
     },
-    [],
+    [onSubmit],
   );
 
   return (

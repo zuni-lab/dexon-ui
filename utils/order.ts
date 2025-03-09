@@ -119,7 +119,7 @@ export const cleanupJsonString = (jsonString: string): string => {
     return JSON.stringify(parsed);
   } catch (e) {
     // If our fixes didn't work, return the original string
-    console.error("Couldn't cleanup JSON:", e);
+    console.warn("Couldn't cleanup JSON:", e);
     return jsonString;
   }
 };

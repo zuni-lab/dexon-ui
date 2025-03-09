@@ -11,13 +11,17 @@ import {
 } from "@/components/shadcn/Drawer";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Wallet } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { BotAvatar } from "./BotAvatar";
 
 export const ChatInterface: IComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { isConnected } = useAccount();
+
+  if (!isConnected) {
+    return null;
+  }
 
   return (
     <Drawer
@@ -34,9 +38,7 @@ export const ChatInterface: IComponent = () => {
             className="fixed right-6 bottom-6 h-12 w-12 cursor-pointer rounded-full border border-purple4/50 bg-purple4/20 p-[1px] shadow-lg hover:bg-purple4/30"
             onClick={() => setIsOpen((prev) => !prev)}
           >
-            <div className="relative h-full w-full">
-              <Image src="/bot.svg" alt="chat" fill />
-            </div>
+            <BotAvatar />
             <div className="absolute right-0 bottom-0 h-3 w-3 rounded-full border border-white bg-green-500" />
           </Button>
         ) : (
@@ -54,10 +56,10 @@ export const ChatInterface: IComponent = () => {
           </ConnectButton.Custom>
         )}
       </DrawerTrigger>
-      <DrawerContent className="fixed top-0 right-0 left-[calc(100%-480px)] mt-0 h-screen items-end border-none">
+      <DrawerContent className="fixed top-4 right-4 bottom-4 mt-0 items-end border-none">
         <DrawerTitle className="hidden" />
         <ChatSidebar
-          className="h-full w-[480px]"
+          className="h-full w-[500px]"
           onClose={() => setIsOpen(false)}
         />
       </DrawerContent>

@@ -51,7 +51,7 @@ export const BaseOrder: IComponent<BaseOrderProps> = ({
       <div className="flex grow flex-col justify-end px-4 pb-4">
         {isConnected ? (
           <Button
-            className="h-14 w-full rounded-xl bg-button p-4 font-medium text-lg"
+            className="h-14 w-full rounded-xl bg-button p-4 font-medium text-lg hover:bg-button/80"
             onClick={onOrderSubmit}
             disabled={isPending}
           >

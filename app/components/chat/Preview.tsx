@@ -1,14 +1,28 @@
 import { format } from "date-fns";
+import { useCallback, useEffect, useRef } from "react";
 
+import { BuyIcon } from "@/components/icons/Buy";
+import { SellIcon } from "@/components/icons/Sell";
+import { Button } from "@/components/shadcn/Button";
 import { determineOrderType } from "@/utils/order";
 import { cn } from "@/utils/shadcn";
 
 export const orderTypeColors: Record<OrderType, string> = {
-  MARKET: "bg-blue-500",
-  LIMIT: "bg-yellow-500",
-  STOP: "bg-red-400",
-  TWAP: "bg-purple-500",
+  STOP: "bg-[#EA322D]",
+  MARKET: "bg-[#36A9FF]",
+  LIMIT: "bg-[#ECA200]",
+  TWAP: "bg-[#10BE59]",
 };
+
+const Item: IComponent<{ title: string; value: string }> = ({
+  title,
+  value,
+}) => (
+  <div className="flex items-center justify-between font-semibold text-sm">
+    <h2>{title}</h2>
+    <span>{value}</span>
+  </div>
+);
 
 export const OrderPreview: IComponent<{
   order: OrderDetails;
@@ -29,56 +43,76 @@ export const OrderPreview: IComponent<{
   }).format(Number.parseFloat(order.amount));
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-2xl bg-purple4/40 px-4 py-2 font-medium">
+    <div>
+      <div className="rounded-2xl bg-purple3 p-3">
         This is a preview of your order. Please review before confirming.
+        <span className="mt-1 block text-xs">
+          {format(timestamp * 1000, "HH:mm")}
+        </span>
       </div>
-      <div className="space-y-2 rounded-2xl border p-4 font-medium">
+      <div className="mt-2 flex flex-col space-y-4 rounded-t-2xl border border-[#382E62] bg-primary px-4 pt-3 pb-5">
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "rounded-md px-3 py-1.5 font-semibold text-sm text-white",
+              "rounded-full font-medium text-xs",
               orderTypeColors[orderType],
             )}
+            style={{
+              padding: "5px 12px 4px 12px",
+            }}
           >
             {orderType.toUpperCase()}
           </span>
-          <span
-            className={cn(
-              "rounded-md px-3 py-1.5 font-semibold text-sm",
-              order.order_side === "BUY" ? "bg-green-600" : "bg-red-600",
-            )}
-          >
-            {order.order_side.toUpperCase()}
-          </span>
-          <span className="ml-auto font-medium text-lg">
-            {order.token_name}
-          </span>
+          <span className="ml-auto font-medium">{order.token_name}</span>
         </div>
-        <div className="space-y-2 [&>h2]:font-medium [&>h2]:text-xl [&_span]:ml-auto">
-          <div className="flex items-center">
-            <h2>Price</h2>
-            <span>{formattedPrice}</span>
-          </div>
-          <div className="flex items-center">
-            <h2>Amount</h2>
-            <span>
-              {formattedAmount} {order.token_name}
-            </span>
-          </div>
-          <div className="flex items-center">
-            <h2>Trigger</h2>
-            <span>
-              Price {order.trigger_condition} {formattedPrice}
-            </span>
-          </div>
+        <div className="space-y-2">
+          <Item title="Price" value={formattedPrice} />
+          <Item
+            title="Amount"
+            value={`${formattedAmount} ${order.token_name}`}
+          />
+          <Item
+            title="Trigger"
+            value={`Price ${order.trigger_condition} ${formattedPrice}`}
+          />
         </div>
-        <div>
-          <span className="text-gray-400 text-sm">
-            {format(timestamp * 1000, "HH:mm")}
-          </span>
-        </div>
+      </div>
+      <div className="flex flex-col space-y-4 rounded-b-2xl border border-[#382E62] border-t-0 bg-purple2 p-3">
+        <Button
+          className="flex h-12 w-full gap-1 rounded-lg bg-button font-medium text-white hover:bg-button/80"
+          // onClick={onOrderSubmit}
+          // disabled={isPending}
+        >
+          {/* {isPending && (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin text-gray-400" />
+          )}
+          {isPending
+            ? "Submitting..."
+            : `${orderSide} ${selectedToken.symbol}`} */}
+          {order.order_side === "BUY" ? (
+            <>
+              <BuyIcon />
+              Buy
+            </>
+          ) : (
+            <>
+              <SellIcon />
+              Sell
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );
 };
+
+{
+  /* <span
+className={cn(
+  "rounded-md px-3 py-1.5 font-semibold text-sm",
+  order.order_side === "BUY" ? "bg-green-600" : "bg-red-600",
+)}
+>
+{order.order_side.toUpperCase()}
+</span> */
+}

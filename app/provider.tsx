@@ -47,10 +47,10 @@ const Providers = ({ children }: React.PropsWithChildren) => {
         <RainbowKitProvider theme={connectBtnTheme}>
           {children}
         </RainbowKitProvider>
-        <ReactQueryDevtools
+        {/* <ReactQueryDevtools
           initialIsOpen={false}
           buttonPosition="bottom-left"
-        />
+        /> */}
       </QueryClientProvider>
       <Toaster />
     </WagmiProvider>

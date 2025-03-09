@@ -120,7 +120,7 @@ export function useMessageSending(
                         toast.error(statusData.message);
                       }
                     } catch (e) {
-                      console.error("Error processing done event:", e);
+                      console.warn("Error processing done event:", e);
                     }
                     break;
                 }

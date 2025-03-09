@@ -1,8 +1,8 @@
 import { parseOrderDetails, parseUnknownMessage } from "@/utils/order";
 import { cn } from "@/utils/shadcn";
 import { format } from "date-fns";
-import { Bot } from "lucide-react";
 import { type ReactNode, useCallback } from "react";
+import { BotAvatar } from "./BotAvatar";
 import { OrderPreview } from "./Preview";
 
 export const UserMessage: IComponent<{ message: ChatMessage }> = ({
@@ -37,7 +37,7 @@ const BotMessage: IComponent<{ message: ChatMessage; isTyping?: boolean }> = ({
             },
           )}
         >
-          <Bot className="h-6 w-6 text-current" />
+          <BotAvatar containerClassName="w-6 h-6" />
         </span>
         <div className="min-w-[80%] text-white">{children}</div>
       </div>

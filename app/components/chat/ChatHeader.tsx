@@ -10,6 +10,7 @@ import { cn } from "@/utils/shadcn";
 import { format } from "date-fns";
 
 import { History, MessageSquare, Plus, Trash2, X } from "lucide-react";
+import { BotAvatar } from "./BotAvatar";
 import { ChatHistory } from "./ChatHistory";
 
 export const ChatHeader: IComponent<{
@@ -30,9 +31,10 @@ export const ChatHeader: IComponent<{
   onClose,
 }) => {
   return (
-    <div className="flex items-center justify-between border-purple3 border-b bg-purple1 px-4 py-3">
-      <div className="flex items-center gap-2">
-        <h2 className="flex items-center gap-2 text-center font-semibold text-gray-200">
+    <div className="flex items-center justify-between border-purple3 border-b bg-purple1 p-4 pl-6">
+      <div className="flex items-center gap-3">
+        <BotAvatar containerClassName="w-9 h-9" />
+        <h2 className="flex items-center gap-2 text-center font-semibold text-lg">
           Zuni Assistant
         </h2>
       </div>
@@ -41,9 +43,9 @@ export const ChatHeader: IComponent<{
           variant="ghost"
           size="icon"
           onClick={handleNewChat}
-          className="text-gray-300 hover:bg-purple4/20"
+          className="hover:bg-purple4/20"
         >
-          <Plus className="h-5 w-5" />
+          <Plus className="h-5 w-5" strokeWidth={2.5} />
         </Button>
         {threads.length > 0 && (
           <Popover
@@ -55,20 +57,20 @@ export const ChatHeader: IComponent<{
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-gray-300 hover:bg-purple4/20"
+                className="hover:bg-purple4/20"
               >
-                <History className="h-5 w-5" />
+                <History className="h-5 w-5" strokeWidth={2.5} />
               </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-80 overflow-y-auto border-purple3 bg-purple1 p-0 text-white"
+              className="w-80 overflow-y-auto border-purple3 bg-purple1 p-0"
               align="end"
               sideOffset={5}
             >
               <div className="border-purple3 border-b p-4">
                 <Button
                   variant={"ghost"}
-                  className="w-full justify-start gap-2 text-gray-300 hover:bg-purple3/30"
+                  className="w-full justify-start gap-2 hover:bg-purple3/30"
                   onClick={() => {
                     handleNewChat();
                     setShowHistory(false);
@@ -97,10 +99,10 @@ export const ChatHeader: IComponent<{
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-300 hover:bg-purple4/20"
+          className="hover:bg-purple4/20"
           onClick={onClose}
         >
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5" strokeWidth={2.5} />
         </Button>
       </div>
     </div>

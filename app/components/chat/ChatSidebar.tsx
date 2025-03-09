@@ -40,7 +40,7 @@ export const ChatSidebar: IComponent<ChatSidebarProps> = ({
     <>
       <div
         className={cn(
-          "z-50 flex w-96 flex-col overflow-hidden rounded-l-xl border-purple3 border-l bg-purple2",
+          "z-50 flex flex-col overflow-hidden rounded-2xl border border-purple3 bg-purple2",
           className,
         )}
       >

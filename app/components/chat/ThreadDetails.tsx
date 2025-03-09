@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useCall } from "wagmi";
 import { ChatInput } from "./ChatInput";
 import { ChatMessages } from "./ChatMessages";
 import { ExampleCards } from "./ExampleCards";
@@ -26,13 +27,20 @@ export const ThreadDetails: IComponent<ThreadDetailsProps> = ({
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = useCallback(() => {
+  const scrollToBottom = () => {
+    if (!messagesEndRef.current) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  };
 
   useEffect(() => {
     scrollToBottom();
-  }, [scrollToBottom]);
+  }, []);
+
+  useEffect(() => {
+    if (typingMessage || newUserMessage || messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [typingMessage, newUserMessage, messages.length, scrollToBottom]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,10 +55,13 @@ export const ThreadDetails: IComponent<ThreadDetailsProps> = ({
   }, []);
 
   return (
-    <div className="scrollable flex h-full scroll-m-0 flex-col overflow-hidden">
+    <div
+      id="thread-details"
+      className="scrollable flex h-full scroll-m-0 flex-col overflow-hidden"
+    >
       <div className="mb-4 flex-1 overflow-y-auto p-4">
         {!thread && !typingMessage ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <WelcomeHeader />
             <ExampleCards onExampleClick={handleExampleClick} />
           </div>
@@ -73,7 +84,6 @@ export const ThreadDetails: IComponent<ThreadDetailsProps> = ({
         )}
       </div>
       <ChatInput
-        className="h-22"
         input={input}
         isLoading={isLoading}
         onChange={setInput}

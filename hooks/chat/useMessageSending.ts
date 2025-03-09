@@ -135,6 +135,7 @@ export function useMessageSending(
           // Update thread details cache directly
           queryClient.setQueryData(
             ["chat", "thread", newThreadRef?.thread_id, address],
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             (old: any) => ({
               ...old,
               messages: [
@@ -150,6 +151,7 @@ export function useMessageSending(
             }),
           );
         }
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       } catch (error: any) {
         console.error(error);
         try {

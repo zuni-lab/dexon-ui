@@ -161,7 +161,8 @@ const OrdersTable: IComponent<{
                   {`${condition(order.type, order.side)} ${formatNumber(order.price)} USDC`}
                 </TableCell>
                 <TableCell className="text-center">
-                  {formatNumber(order.amount * order.price)} USDC
+                  {order.actualAmount ? formatNumber(order.actualAmount) : "-"}{" "}
+                  USDC
                 </TableCell>
                 {value === "OPEN" ? (
                   <TableCell className="text-right">

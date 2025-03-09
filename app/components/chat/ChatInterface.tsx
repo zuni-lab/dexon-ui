@@ -59,7 +59,7 @@ export const ChatInterface: IComponent = () => {
       <DrawerContent className="fixed top-4 right-4 bottom-4 mt-0 items-end border-none">
         <DrawerTitle className="hidden" />
         <ChatSidebar
-          className="h-full w-[500px]"
+          className="h-full w-[460px]"
           onClose={() => setIsOpen(false)}
         />
       </DrawerContent>

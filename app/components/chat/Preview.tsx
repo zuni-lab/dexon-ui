@@ -105,14 +105,3 @@ export const OrderPreview: IComponent<{
     </div>
   );
 };
-
-{
-  /* <span
-className={cn(
-  "rounded-md px-3 py-1.5 font-semibold text-sm",
-  order.order_side === "BUY" ? "bg-green-600" : "bg-red-600",
-)}
->
-{order.order_side.toUpperCase()}
-</span> */
-}

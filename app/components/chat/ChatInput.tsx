@@ -2,7 +2,7 @@ import { SendIcon } from "@/components/icons/Send";
 import { Button } from "@/components/shadcn/Button";
 import { Textarea } from "@/components/shadcn/Textarea";
 import { cn } from "@/utils/shadcn";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 interface ChatInputProps {
   input: string;

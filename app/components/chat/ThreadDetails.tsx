@@ -27,14 +27,16 @@ export const ThreadDetails: IComponent<ThreadDetailsProps> = ({
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    if (!messagesEndRef.current) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = useCallback(() => {
+    const messageContainer = document.querySelector(".scrollable");
+    if (messageContainer) {
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, []);
+  }, [scrollToBottom]);
 
   useEffect(() => {
     if (typingMessage || newUserMessage || messages.length > 0) {

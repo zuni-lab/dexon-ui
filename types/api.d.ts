@@ -16,6 +16,7 @@ interface OrderResponse {
   createdAt: string;
   cancelledAt: string | null;
   filledAt: string | null;
+  txHash: `0x${string}` | null;
   status: OrderStatus;
 }
 

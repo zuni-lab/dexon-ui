@@ -23,8 +23,9 @@ import { cn } from "@/utils/shadcn";
 import { formatNumber, getForrmattedFullDate } from "@/utils/tools";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { add } from "lodash";
-import { Trash2 } from "lucide-react";
+import { ExternalLink, FileSearch, Trash2 } from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
@@ -61,7 +62,32 @@ const OrdersTable: IComponent<{
   totalPages,
   onPageChange,
 }) => {
-  if (!orders || !orders.length) return null;
+  if (!orders) {
+    return null;
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="flex min-h-[38vh] flex-col items-center justify-center rounded-2xl py-2 text-white/40">
+        <div>
+          <FileSearch size={48} />
+        </div>
+        <div className="my-4">
+          {value === "OPEN" ? "No open orders" : "No order history"}
+        </div>
+      </div>
+    );
+  }
+
+  const condition = (orderType: OrderType, orderSide: OrderSide) =>
+    orderType === "LIMIT"
+      ? orderSide === "BUY"
+        ? "<"
+        : ">"
+      : orderSide === "BUY"
+        ? ">"
+        : "<";
+
   return (
     <TabsContent value={value} className="mx-6 flex min-h-[38vh] flex-col pb-2">
       <div className="flex-1 overflow-y-auto">
@@ -78,9 +104,15 @@ const OrdersTable: IComponent<{
               <TableHead className="text-center text-gray-400 text-sm">
                 Trigger price
               </TableHead>
-              <TableHead className="text-center text-gray-400 text-sm">
-                USDC Value
-              </TableHead>
+              {value === "OPEN" ? (
+                <TableHead className="text-center text-gray-400 text-sm">
+                  Estimated Total
+                </TableHead>
+              ) : (
+                <TableHead className="text-center text-gray-400 text-sm">
+                  Actual Total
+                </TableHead>
+              )}
               {value === "OPEN" ? (
                 <TableHead className="text-right text-gray-400 text-sm">
                   Cancel
@@ -98,7 +130,7 @@ const OrdersTable: IComponent<{
                 key={order.id}
                 className={cn(
                   "border-gray-500 border-b-[1px] transition-colors hover:bg-secondary/50",
-                  // order.status === "CANCELLED" && "opacity-40",
+                  order.status === "CANCELLED" && "opacity-50",
                 )}
               >
                 <TableCell className="w-1/6">
@@ -121,13 +153,15 @@ const OrdersTable: IComponent<{
                   {order.side.toLowerCase()}
                 </TableCell>
                 <TableCell className="text-center">
-                  {formatNumber(order.amount)}
+                  {`${formatNumber(order.amount)} ${
+                    getTokenPairFromPath(order.paths).split("/")[0]
+                  }`}
                 </TableCell>
                 <TableCell className="text-center">
-                  ${formatNumber(order.price)}
+                  {`${condition(order.type, order.side)} ${formatNumber(order.price)} USDC`}
                 </TableCell>
                 <TableCell className="text-center">
-                  ${formatNumber(order.amount * order.price)}
+                  {formatNumber(order.amount * order.price)} USDC
                 </TableCell>
                 {value === "OPEN" ? (
                   <TableCell className="text-right">
@@ -146,10 +180,20 @@ const OrdersTable: IComponent<{
                   <TableCell
                     className={cn(
                       "capitalize",
-                      order.status === "CANCELLED" && "text-amber-500",
+                      // order.status === "CANCELLED" && "text-amber-500",
                     )}
                   >
-                    {order.status.toLowerCase()}
+                    <div className="flex items-center justify-end gap-2">
+                      <div>{order.status.toLowerCase()}</div>
+                      {order.status !== "CANCELLED" && (
+                        <Link
+                          href={`https://testnet.monadexplorer.com/tx/${order.txHash}`}
+                          target="_blank"
+                        >
+                          <ExternalLink size={20} className="ms-1 mb-1" />
+                        </Link>
+                      )}
+                    </div>
                   </TableCell>
                 )}
               </TableRow>
@@ -196,7 +240,7 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
   const [openPage, setOpenPage] = useState(1);
   const [historyPage, setHistoryPage] = useState(1);
 
-  const { data: openingOrders } = useQuery({
+  const { data: openOrders } = useQuery({
     queryKey: ["orders", address, "OPEN", openPage],
     queryFn: () => {
       return dexonService.getOrders({
@@ -207,6 +251,7 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
       });
     },
     enabled: !!address,
+    refetchInterval: 5000,
   });
 
   const { data: placedOrders } = useQuery({
@@ -220,12 +265,11 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
       });
     },
     enabled: !!address,
+    refetchInterval: 5000,
   });
 
   // Calculate total pages
-  const openTotalPages = Math.ceil(
-    (openingOrders?.total || 0) / ITEMS_PER_PAGE,
-  );
+  const openTotalPages = Math.ceil((openOrders?.total || 0) / ITEMS_PER_PAGE);
   const historyTotalPages = Math.ceil(
     (placedOrders?.total || 0) / ITEMS_PER_PAGE,
   );
@@ -272,21 +316,10 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
 
   if (!address) return null;
 
-  if (openingOrders?.orders.length === 0 && placedOrders?.orders.length === 0) {
-    return (
-      <div
-        className={cn(
-          "flex min-h-[360px] items-center justify-center rounded-2xl border border-secondary bg-primary/20 py-2 text-white/40 blur-0",
-          className,
-        )}
-      />
-    );
-  }
-
   return (
     <div
       className={cn(
-        "rounded-2xl border border-secondary bg-primary/80 py-2 blur-0",
+        "rounded-2xl border border-secondary bg-primary/60 py-2",
         className,
       )}
     >
@@ -298,17 +331,14 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
         <TabsList className="mx-4">
           <TabButton
             value="OPEN"
-            label={`Opening Orders (${openingOrders?.total})`}
+            label={`Open Orders (${openOrders?.total || 0})`}
           />
-          <TabButton
-            value="HISTORY"
-            label={`Order History (${placedOrders?.total})`}
-          />
+          <TabButton value="HISTORY" label="Order History" />
         </TabsList>
         <div className="h-[1px] w-full bg-gray-500" />
         {type === "OPEN" && (
           <OrdersTable
-            orders={openingOrders?.orders}
+            orders={openOrders?.orders}
             value={type}
             cancelOrder={cancelOrder}
             currentPage={openPage}

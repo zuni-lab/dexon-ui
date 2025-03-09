@@ -16,7 +16,7 @@ export default function HomePage() {
         <TradingPanel className="w-[400px]" />
         <ChatInterface />
       </div>
-      <div className="mt-4 w-[calc(100%-400px)] pr-8">
+      <div className="mt-4 w-full">
         <OrderHistories className="flex-1" />
       </div>
     </div>

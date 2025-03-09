@@ -17,7 +17,7 @@ export const getFomattedTimeAndDate = (inputDate: string | number) => {
 };
 
 export const getForrmattedFullDate = (inputDate: string | number) => {
-  const date = moment(inputDate).utc();
+  const date = moment(inputDate).local();
   const formattedDate = date.format("HH:mm MM-DD-YYYY");
   return date.isValid() ? formattedDate : "Never";
 };
@@ -58,7 +58,8 @@ export const formatNumber = (num: number) => {
     return "0.0";
   }
   const [integer, decimal] = num.toString().split(".");
-  return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}${decimal ? `.${decimal}` : ""}`;
+  const truncatedDecimal = decimal ? decimal.slice(0, 6) : "";
+  return `${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}${truncatedDecimal ? `.${truncatedDecimal}` : ""}`;
 };
 
 export const formatReadableUsd = (value: number) => {

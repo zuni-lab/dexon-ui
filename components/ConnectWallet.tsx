@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import Image from 'next/image';
-import { WalletIcon } from './icons/Wallet';
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Image from "next/image";
+import { WalletIcon } from "./icons/Wallet";
 
 interface ReadyProps {
-  'aria-hidden': boolean;
+  "aria-hidden": boolean;
   style: {
     opacity: number;
-    pointerEvents: 'none';
-    userSelect: 'none';
+    pointerEvents: "none";
+    userSelect: "none";
   };
 }
 
@@ -18,7 +18,14 @@ const ConnectWallet: IComponent<{
 }> = ({ className }) => {
   return (
     <ConnectButton.Custom>
-      {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+      {({
+        account,
+        chain,
+        openAccountModal,
+        openChainModal,
+        openConnectModal,
+        mounted,
+      }) => {
         const ready = mounted;
         if (!ready) return null;
 
@@ -26,12 +33,12 @@ const ConnectWallet: IComponent<{
           <div
             {...(!ready
               ? ({
-                  'aria-hidden': true,
+                  "aria-hidden": true,
                   style: {
                     opacity: 0,
-                    pointerEvents: 'none',
-                    userSelect: 'none'
-                  }
+                    pointerEvents: "none",
+                    userSelect: "none",
+                  },
                 } as ReadyProps)
               : {})}
             className={`${className}`}
@@ -41,11 +48,13 @@ const ConnectWallet: IComponent<{
                 return (
                   <button
                     onClick={openConnectModal}
-                    type='button'
-                    className='flex justify-center items-center gap-2 p-4 bg-primary rounded-full hover:bg-primary/90 transition-colors duration-200 w-[194px]'
+                    type="button"
+                    className="flex w-[194px] items-center justify-center gap-2 rounded-full bg-primary p-4 transition-colors duration-200 hover:bg-primary/90"
                   >
-                    <WalletIcon className='w-5 h-5' />
-                    <span className='text-white font-medium'>Connect Wallet</span>
+                    <WalletIcon className="h-5 w-5" />
+                    <span className="font-medium text-white">
+                      Connect Wallet
+                    </span>
                   </button>
                 );
               }
@@ -54,8 +63,8 @@ const ConnectWallet: IComponent<{
                 return (
                   <button
                     onClick={openChainModal}
-                    type='button'
-                    className='px-6 py-3 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors duration-200'
+                    type="button"
+                    className="rounded-full bg-red-600 px-6 py-3 text-white transition-colors duration-200 hover:bg-red-700"
                   >
                     Wrong network
                   </button>
@@ -63,7 +72,7 @@ const ConnectWallet: IComponent<{
               }
 
               return (
-                <div className='flex items-center gap-3'>
+                <div className="flex items-center gap-3">
                   {/* <button
                     onClick={openChainModal}
                     type='button'
@@ -85,15 +94,19 @@ const ConnectWallet: IComponent<{
                   </button> */}
                   <button
                     onClick={openAccountModal}
-                    type='button'
-                    className='flex items-center gap-2 px-4 py-2 bg-primary rounded-full hover:bg-primary/80 transition-colors duration-200 h-[52px]'
+                    type="button"
+                    className="flex h-[52px] items-center gap-2 rounded-full bg-primary px-4 py-2 transition-colors duration-200 hover:bg-primary/80"
                   >
-                    <div className='flex items-center'>
-                      <div className='w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500' />
-                      <span className='text-white ml-2'>{account.displayName}</span>
+                    <div className="flex items-center">
+                      <div className="h-5 w-5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
+                      <span className="ml-2 text-white">
+                        {account.displayName}
+                      </span>
                     </div>
-                    <span className='text-gray-400'>
-                      {account.displayBalance ? ` (${account.displayBalance})` : ''}
+                    <span className="text-gray-400">
+                      {account.displayBalance
+                        ? ` (${account.displayBalance})`
+                        : ""}
                     </span>
                   </button>
                 </div>

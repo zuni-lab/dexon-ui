@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface TokenState {
   token: TradeableToken;
@@ -6,6 +6,6 @@ interface TokenState {
 }
 
 export const useSelectedToken = create<TokenState>((set) => ({
-  token: 'ETH',
-  setToken: (token) => set({ token })
+  token: "ETH",
+  setToken: (token) => set({ token }),
 }));

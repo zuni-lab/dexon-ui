@@ -1,7 +1,7 @@
-import { Button } from '@/components/shadcn/Button';
-import { TradeableTokensUI } from '@/constants/tokens';
-import { useSelectedToken } from '@/state/token';
-import { cn } from '@/utils/shadcn';
+import { Button } from "@/components/shadcn/Button";
+import { TradeableTokensUI } from "@/constants/tokens";
+import { useSelectedToken } from "@/state/token";
+import { cn } from "@/utils/shadcn";
 
 const TokenButton: IComponent<{
   icon: React.ReactNode;
@@ -12,10 +12,10 @@ const TokenButton: IComponent<{
   return (
     <Button
       className={cn(
-        'rounded-full hover:bg-[#3a2b6a] flex items-center justify-center gap-2 px-4 py-2 border-2 border-transparent transition-all duration-150 cursor-pointer',
+        "flex cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-transparent px-4 py-2 transition-all duration-150 hover:bg-[#3a2b6a]",
         {
-          'border-purple4 bg-purple3 backdrop-blur-lg': selected
-        }
+          "border-purple4 bg-purple3 backdrop-blur-lg": selected,
+        },
       )}
       onClick={onClick}
     >
@@ -28,7 +28,7 @@ const TokenButton: IComponent<{
 export const TokenSelector: IComponent = () => {
   const { token: selectedToken, setToken } = useSelectedToken();
   return (
-    <div className='flex gap-2'>
+    <div className="flex gap-2">
       {Object.entries(TradeableTokensUI).map(([token, { icon }]) => (
         <TokenButton
           key={token}

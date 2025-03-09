@@ -1,30 +1,30 @@
-import './global.scss';
+import "./global.scss";
 
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { Suspense } from 'react';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { Suspense } from "react";
 
-import ProgressBarClient from '@/components/ProgressBar';
-import { TransitionLayout } from '@/layouts/TransitionLayout';
+import ProgressBarClient from "@/components/ProgressBar";
+import { TransitionLayout } from "@/layouts/TransitionLayout";
 
-import Providers from './provider';
-import { WrapperLayout } from './wrapper';
+import Providers from "./provider";
+import { WrapperLayout } from "./wrapper";
 
-export async function generateStaticParams() {
-  return [{ lang: 'en-US' }, { lang: 'vi-VN' }];
+export function generateStaticParams() {
+  return [{ lang: "en-US" }, { lang: "vi-VN" }];
 }
 
-const font = Inter({ subsets: ['latin'] });
+const font = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  description: 'Your DAPP description',
-  icons: '/favicon.ico',
-  title: 'ZUNI - DAPP'
+  description: "Your DAPP description",
+  icons: "/favicon.ico",
+  title: "ZUNI - DAPP",
 };
 
 export default function RootLayout({
   children,
-  params
+  params,
 }: {
   children: React.ReactNode;
   params: TAny;

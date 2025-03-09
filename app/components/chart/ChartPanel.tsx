@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { cn } from '@/utils/shadcn';
-import ChartStats from './ChartStats';
-import { PriceChart } from './PriceChart';
-import { TokenSelector } from './TokenSelector';
+import { cn } from "@/utils/shadcn";
+import ChartStats from "./ChartStats";
+import { PriceChart } from "./PriceChart";
+import { TokenSelector } from "./TokenSelector";
 
 export const ChartPanel: IComponent<{
   className?: string;
@@ -11,15 +11,15 @@ export const ChartPanel: IComponent<{
   return (
     <div
       className={cn(
-        'rounded-2xl border border-secondary bg-primary/90 backdrop-blur-lg divide-y divide-secondary flex flex-col',
-        className
+        "flex flex-col divide-y divide-secondary rounded-2xl border border-secondary bg-primary/80 blur-0 backdrop-blur-lg",
+        className,
       )}
     >
-      <div className='px-6 flex justify-between items-center py-4'>
+      <div className="flex items-center justify-between px-6 py-4">
         <TokenSelector />
         <ChartStats />
       </div>
-      <PriceChart className='p-6 h-full grow' />
+      <PriceChart className="h-full grow p-6" />
     </div>
   );
 };

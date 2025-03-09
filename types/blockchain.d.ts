@@ -1,5 +1,6 @@
 type Token = {
   address: `0x${string}`;
+  underlying: string;
   name: string;
   symbol: string;
   decimals: number;
@@ -12,6 +13,6 @@ type Pool = {
   token1: Token;
 };
 
-type TokenKey = 'BTC' | 'ETH' | 'SOL' | 'USDC';
+type TokenKey = "BTC" | "ETH" | "SOL" | "USDC";
 
-type TradeableToken = Exclude<TokenKey, 'USDC'>;
+type TradeableToken = Exclude<TokenKey, "USDC">;

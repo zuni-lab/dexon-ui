@@ -1,8 +1,17 @@
-export const BoxInfo: IComponent<{ label: string; value: string }> = ({ label, value }) => {
+import { cn } from "@/utils/shadcn";
+
+export const BoxInfo: IComponent<{
+  label: string;
+  value: string;
+  labelClassName?: string;
+  valueClassName?: string;
+}> = ({ label, value, labelClassName, valueClassName }) => {
   return (
-    <div className='flex flex-col gap-.5 items-center justify-center text-white font-semibold'>
-      <span className='text-xs opacity-40'>{label}</span>
-      <span className='text-sm font-bold'>{value}</span>
+    <div className="flex flex-col items-center justify-center gap-.5 font-semibold text-white">
+      <span className={cn("text-xs opacity-40", labelClassName)}>{label}</span>
+      <span className={cn("font-semibold text-sm", valueClassName)}>
+        {value}
+      </span>
     </div>
   );
 };

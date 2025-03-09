@@ -1,33 +1,80 @@
-'use client';
+"use client";
 
-import { WalletIcon } from '@/components/icons/Wallet';
-import { Input } from '@/components/shadcn/Input';
-import { OrderSide } from '@/constants/orders';
-import { Tokens } from '@/constants/tokens';
-import { usePlaceOrder } from '@/hooks/usePlaceOrder';
-import { useQuotePrice } from '@/hooks/useQuotePrice';
-import { useSelectedToken } from '@/state/token';
-import { useMemo, useState } from 'react';
-import { erc20Abi, formatUnits, zeroAddress } from 'viem';
-import { useAccount, useReadContract } from 'wagmi';
-import { BaseOrder } from './BaseOrder';
-import { useOrderSide } from './OrderWrapper';
+import { Input } from "@/components/shadcn/Input";
+import { TriggerEnum } from "@/constants/orders";
+import { Tokens, TokensUI } from "@/constants/tokens";
+import { usePlaceOrder } from "@/hooks/usePlaceOrder";
+import { useQuotePrice } from "@/hooks/useQuotePrice";
+import { useSelectedToken } from "@/state/token";
+import { cn } from "@/utils/shadcn";
+import { useState } from "react";
+import { erc20Abi, zeroAddress } from "viem";
+import { useAccount, useReadContract } from "wagmi";
+import { BaseOrder } from "./BaseOrder";
+import { Coin } from "./Coin";
+import { useOrderSide } from "./OrderWrapper";
+import { StableCoinSection } from "./StableCoin";
 
 interface ConditionOrderProps {
-  orderType: Exclude<OrderType, 'market' | 'twap'>;
+  orderType: Exclude<OrderType, "MARKET" | "TWAP">;
 }
 
-export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => {
-  const { address } = useAccount();
+const TriggerPrice: IComponent<{
+  triggerCondition: TriggerEnum;
+  triggerPrice: string;
+  setTriggerPrice: (value: string) => void;
+}> = ({ triggerCondition, triggerPrice, setTriggerPrice }) => {
+  return (
+    <div className="flex flex-col py-4">
+      <div className="flex items-center justify-between px-4">
+        <p className="flex items-center font-semibold text-sm">
+          When price
+          <span
+            className={cn(
+              "ml-1 bg-gradient-to-r from-green-500 to-yellow-500 bg-clip-text font-semibold text-lg text-transparent",
+              {
+                "from-green-500 to-yellow-500":
+                  triggerCondition === TriggerEnum.GREATER_THAN,
+                "from-red-500 to-yellow-500":
+                  triggerCondition === TriggerEnum.LESS_THAN,
+              },
+            )}
+          >
+            {triggerCondition.toUpperCase()}
+          </span>
+        </p>
+      </div>
+      <div className="relative flex items-center px-4">
+        <Input
+          placeholder="0.0"
+          value={triggerPrice}
+          onChange={(e) => setTriggerPrice(e.target.value)}
+          className="!pr-0 h-16 border-0 bg-transparent py-0 pl-0 font-medium text-xl focus-visible:ring-0 focus-visible:ring-offset-0"
+        />
+        <Coin
+          type="button"
+          symbol="USDC"
+          icon={TokensUI.USDC.icon}
+          className="flex-shrink-0 cursor-default"
+        />
+      </div>
+    </div>
+  );
+};
+
+export const ConditionOrder: IComponent<ConditionOrderProps> = ({
+  orderType,
+}) => {
+  const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
-  const [amount, setAmount] = useState('0');
-  const [triggerPrice, setTriggerPrice] = useState('0');
+  const [amount, setAmount] = useState("");
+  const [triggerPrice, setTriggerPrice] = useState("");
 
   const { data: usdcBalance } = useReadContract({
     abi: erc20Abi,
     address: Tokens.USDC.address,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress]
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
   });
 
   const { token: selectedToken } = useSelectedToken();
@@ -36,7 +83,14 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
     orderSide,
-    selectedToken: token
+    selectedToken: token,
+  });
+
+  const { data: tokenBalance } = useReadContract({
+    abi: erc20Abi,
+    address: token.address,
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
   });
 
   const { placeOrder, isPending } = usePlaceOrder({
@@ -44,7 +98,7 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
     orderSide,
     orderType,
     selectedToken: token,
-    triggerPrice
+    triggerPrice,
   });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,15 +106,14 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
     setAmount(e.target.value);
   };
 
-  const triggerCondition = useMemo(() => {
-    if (orderType === 'limit') {
-      return orderSide === OrderSide.BUY ? '<' : '>';
-    }
-    if (orderType === 'stop') {
-      return orderSide === OrderSide.BUY ? '>' : '<';
-    }
-    return '';
-  }, [orderType, orderSide]);
+  const condition =
+    orderType === "LIMIT"
+      ? orderSide === "BUY"
+        ? TriggerEnum.LESS_THAN
+        : TriggerEnum.GREATER_THAN
+      : orderSide === "BUY"
+        ? TriggerEnum.GREATER_THAN
+        : TriggerEnum.LESS_THAN;
 
   return (
     <BaseOrder
@@ -71,39 +124,20 @@ export const ConditionOrder: React.FC<ConditionOrderProps> = ({ orderType }) => 
       onAmountChange={handleAmountChange}
       onOrderSubmit={placeOrder}
       isPending={isPending}
+      isConnected={isConnected}
+      tokenBalance={tokenBalance || BigInt(0)}
+      selectedToken={token}
     >
-      <div className='mb-6'>
-        <div className='flex items-center justify-between mb-2'>
-          <div className='text-sm font-semibold'>Trigger Price</div>
-          <div className='flex items-center'>
-            <WalletIcon className='w-4 h-4 mr-1 opacity-60' />
-            <div className='text-sm text-gray-400'>
-              {usdcBalance ? Number(formatUnits(usdcBalance, Tokens.USDC.decimals)).toFixed(2) : '0.00'}{' '}
-              {Tokens.USDC.symbol}
-            </div>
-          </div>
-        </div>
-        <div className='relative'>
-          <div className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'>{triggerCondition}</div>
-          <Input
-            type='text'
-            value={triggerPrice}
-            onChange={(e) => setTriggerPrice(e.target.value)}
-            className='bg-[#322959] border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12 pl-8'
-          />
-          <div className='absolute right-2 top-1/2 -translate-y-1/2 h-8 px-2 bg-[#251D46] rounded-lg flex items-center gap-2'>
-            <div className='w-6 h-6 rounded-full flex items-center justify-center text-sm'>C</div>
-            <span>{Tokens.USDC.symbol}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className='border-t border-[#322959] pt-4'>
-        <div className='flex flex-row justify-between items-center'>
-          <div className='text-sm text-gray-400'>USDC Value</div>
-          <div className='text-xs'>${usdcAmount}</div>
-        </div>
-      </div>
+      <TriggerPrice
+        triggerCondition={condition}
+        triggerPrice={triggerPrice}
+        setTriggerPrice={setTriggerPrice}
+      />
+      <StableCoinSection
+        orderSide={orderSide}
+        usdcBalance={usdcBalance}
+        usdcAmount={(Number(amount) * Number(triggerPrice)).toString()}
+      />
     </BaseOrder>
   );
 };

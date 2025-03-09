@@ -1,44 +1,56 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/shadcn/Button';
-import { Tokens, TokensUI } from '@/constants/tokens';
-import { useHandleSwap } from '@/hooks/useHandleSwap';
-import { useQuotePrice } from '@/hooks/useQuotePrice';
-import { useSelectedToken } from '@/state/token';
-import { ChevronRight } from 'lucide-react';
-import { useState } from 'react';
-import { erc20Abi, zeroAddress } from 'viem';
-import { useAccount, useReadContract } from 'wagmi';
-import { Balance } from './Balance';
-import { BaseOrder } from './BaseOrder';
-import { useOrderSide } from './OrderWrapper';
-import { StableCoin } from './StableCoin';
+import { Button } from "@/components/shadcn/Button";
+import { Tokens } from "@/constants/tokens";
+import { useHandleSwap } from "@/hooks/useHandleSwap";
+import { useQuotePrice } from "@/hooks/useQuotePrice";
+import { useSelectedToken } from "@/state/token";
+import { ChevronRight } from "lucide-react";
+import { useCallback, useState } from "react";
+import { erc20Abi, zeroAddress } from "viem";
+import { useAccount, useReadContract } from "wagmi";
+import { BaseOrder } from "./BaseOrder";
+import { useOrderSide } from "./OrderWrapper";
+import { StableCoinSection } from "./StableCoin";
 
-export const MarketOrder: React.FC = () => {
-  const { address } = useAccount();
+export const MarketOrder: IComponent = () => {
+  const { address, isConnected } = useAccount();
   const orderSide = useOrderSide();
-  const [amount, setAmount] = useState('');
-  const { data: usdcBalance } = useReadContract({
-    abi: erc20Abi,
-    address: Tokens.USDC.address,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress]
-  });
-
+  const [amount, setAmount] = useState("");
   const { token: selectedToken } = useSelectedToken();
   const token = Tokens[selectedToken];
+
+  const { data: usdcBalance, refetch: refetchUsdcBalance } = useReadContract({
+    abi: erc20Abi,
+    address: Tokens.USDC.address,
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
+  });
+
+  const { data: tokenBalance, refetch: refetchTokenBalance } = useReadContract({
+    abi: erc20Abi,
+    address: token.address,
+    functionName: "balanceOf",
+    args: [address || zeroAddress],
+  });
 
   const { priceRate, usdcAmount } = useQuotePrice({
     amount,
     orderSide,
-    selectedToken: token
+    selectedToken: token,
   });
+
+  const refreshBalances = useCallback(async () => {
+    await refetchUsdcBalance();
+    await refetchTokenBalance();
+  }, [refetchUsdcBalance, refetchTokenBalance]);
 
   const { handleSwap, isPending } = useHandleSwap({
     amount,
     orderSide,
     selectedToken: token,
-    usdcAmount
+    usdcAmount,
+    callback: refreshBalances,
   });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,22 +67,26 @@ export const MarketOrder: React.FC = () => {
       onAmountChange={handleAmountChange}
       onOrderSubmit={handleSwap}
       isPending={isPending}
+      tokenBalance={tokenBalance || BigInt(0)}
+      selectedToken={token}
+      isConnected={isConnected}
       renderFooter={() => (
-        <div className='bg-purple4/60 mt-4 mx-4 py-2 rounded-xl font-semibold text-lg'>
-          <Button variant='ghost' className='w-full justify-between text-white group'>
+        <div className="mx-4 mt-4 rounded-xl bg-purple4/60 py-2 font-semibold text-lg">
+          <Button
+            variant="ghost"
+            className="group w-full justify-between text-white"
+          >
             <span>Advanced Settings</span>
-            <ChevronRight className='w-4 h-4 transition-transform group-data-[state=open]:rotate-90' />
+            <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
           </Button>
         </div>
       )}
     >
-      <div className='flex flex-col gap-1 px-4 py-4'>
-        <div className='flex items-center justify-between'>
-          <h2 className='text-sm font-semibold'>You pay</h2>
-          <Balance balance={usdcBalance} token={Tokens.USDC} />
-        </div>
-        <StableCoin amount={usdcAmount} icon={TokensUI.USDC.icon} symbol={'USDC'} />
-      </div>
+      <StableCoinSection
+        orderSide={orderSide}
+        usdcBalance={usdcBalance}
+        usdcAmount={usdcAmount}
+      />
     </BaseOrder>
   );
 };

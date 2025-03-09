@@ -16,3 +16,5 @@ type Pool = {
 type TokenKey = "BTC" | "ETH" | "SOL" | "USDC";
 
 type TradeableToken = Exclude<TokenKey, "USDC">;
+
+type WrappedTradeableToken = `W${TradeableToken}`;

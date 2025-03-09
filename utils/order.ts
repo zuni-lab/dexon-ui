@@ -1,3 +1,37 @@
+export const validateOrderDetails = (order: OrderDetails) => {
+  if (
+    !order.trigger_condition ||
+    !order.trigger_price ||
+    !order.token_name ||
+    !order.amount ||
+    !order.order_side
+  ) {
+    throw new Error("Missing required fields");
+  }
+
+  if (!["<", ">", "="].includes(order.trigger_condition)) {
+    throw new Error("Invalid trigger condition");
+  }
+
+  if (!/^\d+(\.\d+)?$/.test(order.trigger_price)) {
+    throw new Error("Invalid trigger price");
+  }
+
+  if (!/^\d+(\.\d+)?$/.test(order.amount)) {
+    throw new Error("Invalid amount");
+  }
+
+  if (!["BUY", "SELL"].includes(order.order_side)) {
+    throw new Error("Invalid order side");
+  }
+
+  if (!["WBTC", "WETH", "WSOL"].includes(order.token_name)) {
+    throw new Error("Invalid token name");
+  }
+
+  return true;
+};
+
 export function determineOrderType(order: OrderDetails): OrderType {
   if (order.trigger_condition === "=") {
     return "MARKET";

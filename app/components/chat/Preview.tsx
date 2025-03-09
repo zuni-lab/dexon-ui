@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import { useCallback, useEffect, useRef } from "react";
 
 import { BuyIcon } from "@/components/icons/Buy";
 import { SellIcon } from "@/components/icons/Sell";

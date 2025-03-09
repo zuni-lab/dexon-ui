@@ -92,3 +92,34 @@ const trimMessage = (jsonString: string) => {
   trimmed = trimmed.replace(/`$/, "");
   return trimmed;
 };
+
+export const cleanupJsonString = (jsonString: string): string => {
+  let cleanedString = jsonString;
+
+  // Handle case where we have concatenated partial JSON objects
+  if (jsonString.startsWith("{") && !jsonString.endsWith("}")) {
+    cleanedString += "}";
+  }
+
+  // Fix common issues with quotes and syntax
+  cleanedString = cleanedString
+    // Fix cases where we have ": " (missing closing quote)
+    .replace(/:\s*"([^"]*)(,|$)/g, ':"$1"$2')
+    // Fix cases where we have missing quotes around property names
+    .replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3')
+    // Fix double colons
+    .replace(/::/g, ":")
+    // Remove any stray quotes
+    .replace(/"""/g, '"')
+    .replace(/""/g, '"');
+
+  // Attempt to validate and format JSON
+  try {
+    const parsed = JSON.parse(cleanedString);
+    return JSON.stringify(parsed);
+  } catch (e) {
+    // If our fixes didn't work, return the original string
+    console.error("Couldn't cleanup JSON:", e);
+    return jsonString;
+  }
+};

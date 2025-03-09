@@ -18,11 +18,10 @@ interface ThreadDetailsRequest {
 }
 
 export const chatService = {
-  async sendMessage(data: {
-    message: string;
-    threadId?: string;
-    userAddress: string;
-  }) {
+  async sendMessage(
+    data: { message: string; threadId?: string; userAddress: string },
+    retries = 3, // Max retries
+  ): Promise<ReadableStream> {
     try {
       const response = await fetch(
         `${ProjectENV.NEXT_PUBLIC_API_URL}/api/chat/dex`,
@@ -39,6 +38,22 @@ export const chatService = {
           }),
         },
       );
+
+      if (!response.ok) {
+        const errorText = await response.text(); // Get error message
+
+        // Handle 503 (Service Unavailable)
+        if (response.status === 503 && retries > 0) {
+          const retryAfter =
+            Number.parseInt(response.headers.get("Retry-After") || "1") * 1000; // Convert to ms
+          console.warn(`503 received, retrying in ${retryAfter}ms...`);
+
+          await new Promise((resolve) => setTimeout(resolve, retryAfter)); // Wait before retrying
+          return chatService.sendMessage(data, retries - 1); // Retry
+        }
+
+        throw new Error(`Server Error ${response.status}: ${errorText}`);
+      }
 
       if (!response.body) {
         throw new Error("No response body from server");

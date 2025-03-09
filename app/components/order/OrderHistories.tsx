@@ -22,7 +22,6 @@ import { getTokenPairFromPath } from "@/utils/dex";
 import { cn } from "@/utils/shadcn";
 import { formatNumber, getForrmattedFullDate } from "@/utils/tools";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { add } from "lodash";
 import { ExternalLink, FileSearch, Trash2 } from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -160,10 +159,17 @@ const OrdersTable: IComponent<{
                 <TableCell className="text-center">
                   {`${condition(order.type, order.side)} ${formatNumber(order.price)} USDC`}
                 </TableCell>
-                <TableCell className="text-center">
-                  {order.actualAmount ? formatNumber(order.actualAmount) : "-"}{" "}
-                  USDC
-                </TableCell>
+                {value === "OPEN" ? (
+                  <TableCell className="text-center">
+                    {`${formatNumber(order.amount * order.price)} USDC`}
+                  </TableCell>
+                ) : (
+                  <TableCell className="text-center">
+                    {order.actualAmount
+                      ? `${formatNumber(order.actualAmount)} USDC`
+                      : "-"}
+                  </TableCell>
+                )}
                 {value === "OPEN" ? (
                   <TableCell className="text-right">
                     <TooltipWrapper text="Cancel Order" side="right">

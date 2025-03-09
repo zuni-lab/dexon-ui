@@ -153,11 +153,10 @@ export function useMessageSending(
         }
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       } catch (error: any) {
-        console.error(error);
         try {
           toast.error(JSON.parse(error.response.data).message);
         } catch (_e) {
-          toast.error(error.message);
+          toast.error(`Server error: ${JSON.parse(error.message).message}`);
         }
       } finally {
         clear();

@@ -27,22 +27,12 @@ export const ThreadDetails: IComponent<ThreadDetailsProps> = ({
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = useCallback(() => {
-    const messageContainer = document.querySelector(".scrollable");
-    if (messageContainer) {
-      messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
-  }, []);
-
   useEffect(() => {
-    scrollToBottom();
-  }, [scrollToBottom]);
-
-  useEffect(() => {
+    if (!messagesEndRef.current) return;
     if (typingMessage || newUserMessage || messages.length > 0) {
-      scrollToBottom();
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [typingMessage, newUserMessage, messages.length, scrollToBottom]);
+  }, [typingMessage, newUserMessage, messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

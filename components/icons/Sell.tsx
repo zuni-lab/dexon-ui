@@ -31,6 +31,7 @@ export const SellIcon: ISvgComponent = () => {
 
 export const SellIconSolid: ISvgComponent = () => {
   return (
+    // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="21"

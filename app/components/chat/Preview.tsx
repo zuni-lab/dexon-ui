@@ -1,10 +1,18 @@
 import { format } from "date-fns";
 
-import { BuyIcon } from "@/components/icons/Buy";
-import { SellIcon } from "@/components/icons/Sell";
+import { BuyIconSolid } from "@/components/icons/Buy";
+import { SellIconSolid } from "@/components/icons/Sell";
 import { Button } from "@/components/shadcn/Button";
-import { determineOrderType } from "@/utils/order";
+import { Tokens } from "@/constants/tokens";
+import { useHandleSwap } from "@/hooks/useHandleSwap";
+import { usePlaceOrder } from "@/hooks/usePlaceOrder";
+import { determineOrderType, validateOrderDetails } from "@/utils/order";
 import { cn } from "@/utils/shadcn";
+import { useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { useCallback } from "react";
+import { toast } from "sonner";
+import { useAccount } from "wagmi";
 
 export const orderTypeColors: Record<OrderType, string> = {
   STOP: "bg-[#EA322D]",
@@ -27,6 +35,13 @@ export const OrderPreview: IComponent<{
   order: OrderDetails;
   timestamp: number;
 }> = ({ order, timestamp }) => {
+  try {
+    validateOrderDetails(order);
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  } catch (error: any) {
+    return <div>Problem with order details: {error.message}</div>;
+  }
+
   const orderType = determineOrderType(order);
 
   const formattedPrice = new Intl.NumberFormat("en-US", {
@@ -40,6 +55,8 @@ export const OrderPreview: IComponent<{
     minimumFractionDigits: 4,
     maximumFractionDigits: 6,
   }).format(Number.parseFloat(order.amount));
+
+  const ExecutionComponent = orderType === "MARKET" ? Market : Condition;
 
   return (
     <div>
@@ -77,30 +94,134 @@ export const OrderPreview: IComponent<{
         </div>
       </div>
       <div className="flex flex-col space-y-4 rounded-b-2xl border border-[#382E62] border-t-0 bg-purple2 p-3">
-        <Button
-          className="flex h-12 w-full gap-1 rounded-lg bg-button font-medium text-white hover:bg-button/80"
-          // onClick={onOrderSubmit}
-          // disabled={isPending}
-        >
-          {/* {isPending && (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin text-gray-400" />
+        <ExecutionComponent order={order} orderType={orderType}>
+          {({ onSubmit, isPending }) => (
+            <Button
+              className="flex h-12 w-full gap-1 rounded-lg bg-button font-medium text-white hover:bg-button/80"
+              onClick={onSubmit}
+              disabled={isPending}
+            >
+              <OrderButton isPending={isPending} orderSide={order.order_side} />
+            </Button>
           )}
-          {isPending
-            ? "Submitting..."
-            : `${orderSide} ${selectedToken.symbol}`} */}
-          {order.order_side === "BUY" ? (
-            <>
-              <BuyIcon />
-              Buy
-            </>
-          ) : (
-            <>
-              <SellIcon />
-              Sell
-            </>
-          )}
-        </Button>
+        </ExecutionComponent>
       </div>
     </div>
   );
 };
+
+interface OrderExecutionProps {
+  order: OrderDetails;
+  orderType: OrderType;
+  children: (props: {
+    onSubmit: () => Promise<void>;
+    isPending: boolean;
+  }) => React.JSX.Element;
+}
+
+const Condition = ({
+  order,
+  orderType,
+  children,
+}: OrderExecutionProps): React.JSX.Element => {
+  const { address } = useAccount();
+  const { placeOrder, isPending } = usePlaceOrder({
+    amount: order.amount,
+    orderSide: order.order_side,
+    orderType: orderType as Exclude<OrderType, "MARKET" | "TWAP">,
+    selectedToken: Tokens[order.token_name.slice(1) as TokenKey],
+    triggerPrice: order.trigger_price,
+  });
+
+  const handleSubmit = useCallback(async () => {
+    if (!address) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+    try {
+      await placeOrder();
+    } catch (error) {
+      console.error("Place order error:", error);
+    }
+  }, [address, placeOrder]);
+
+  return children({
+    onSubmit: handleSubmit,
+    isPending,
+  });
+};
+
+const Market = ({
+  order,
+  children,
+}: OrderExecutionProps): React.JSX.Element => {
+  const { address, chainId } = useAccount();
+  const queryClient = useQueryClient();
+
+  const refreshBalances = useCallback(async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["balance", { address: address, chainId: chainId }],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [
+        "readContract",
+        {
+          address: Tokens.USDC.address,
+          args: [address],
+          chainId: chainId,
+          functionName: "balanceOf",
+        },
+      ],
+    });
+  }, [address, queryClient, chainId]);
+
+  const { handleSwap, isPending } = useHandleSwap({
+    amount: order.amount,
+    orderSide: order.order_side,
+    selectedToken: Tokens[order.token_name.slice(1) as TokenKey],
+    usdcAmount: (Number(order.amount) * Number(order.trigger_price)).toString(),
+    callback: refreshBalances,
+  });
+
+  const handleSubmit = useCallback(async () => {
+    if (!address) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+
+    try {
+      await handleSwap();
+    } catch (error) {
+      console.error("Swap error:", error);
+    }
+  }, [address, handleSwap]);
+
+  return children({
+    onSubmit: handleSubmit,
+    isPending,
+  });
+};
+
+const OrderButton = ({
+  isPending,
+  orderSide,
+}: { isPending: boolean; orderSide: OrderSide }) => (
+  <>
+    {isPending ? (
+      <>
+        <Loader2 className="mr-2 h-5 w-5 animate-spin text-gray-400" />
+        Submitting...
+      </>
+    ) : orderSide === "BUY" ? (
+      <>
+        <BuyIconSolid />
+        Buy
+      </>
+    ) : (
+      <>
+        <SellIconSolid />
+        Sell
+      </>
+    )}
+  </>
+);

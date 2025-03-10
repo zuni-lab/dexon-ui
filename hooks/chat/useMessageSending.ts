@@ -1,5 +1,5 @@
 import { chatService } from "@/api/chat";
-import { cleanupJsonString } from "@/utils/order";
+import { cleanupJsonString, isValidJson } from "@/utils/order";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -104,6 +104,10 @@ export function useMessageSending(
                       const statusData = JSON.parse(data);
                       if (statusData.status === "completed") {
                         try {
+                          if (!isValidJson(currentMessage)) {
+                            console.debug("Normal message:", currentMessage);
+                            return;
+                          }
                           const cleanedMessage =
                             cleanupJsonString(currentMessage);
                           const parsedMessage = JSON.parse(cleanedMessage);

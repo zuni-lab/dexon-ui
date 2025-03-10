@@ -89,3 +89,28 @@ export const toQueryString = (params: object) => {
     })
     .join("&");
 };
+
+export function formatTimeInterval(minutes: number): string {
+  if (!minutes) return "0 minutes";
+
+  const intervals = [
+    { unit: "month", value: 43200 }, // 30 days
+    { unit: "week", value: 10080 }, // 7 days
+    { unit: "day", value: 1440 }, // 24 hours
+    { unit: "hour", value: 60 },
+    { unit: "minute", value: 1 },
+  ];
+
+  let remaining = minutes;
+  const parts: string[] = [];
+
+  for (const { unit, value } of intervals) {
+    if (remaining >= value) {
+      const count = Math.floor(remaining / value);
+      parts.push(`${count} ${unit}${count > 1 ? "s" : ""}`);
+      remaining %= value;
+    }
+  }
+
+  return parts.length > 0 ? parts.join(" ") : "0 minutes";
+}

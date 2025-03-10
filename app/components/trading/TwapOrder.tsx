@@ -5,11 +5,15 @@ import { Tokens } from "@/constants/tokens";
 import { usePlaceTwapOrder } from "@/hooks/usePlaceTwapOrder";
 import { useQuotePrice } from "@/hooks/useQuotePrice";
 import { useSelectedToken } from "@/state/token";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { erc20Abi, zeroAddress } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { BaseOrder } from "./BaseOrder";
 import { useOrderSide } from "./OrderWrapper";
+
+const isValidPositiveInteger = (val: string) => {
+  return /^[1-9]\d*$/.test(val);
+};
 
 const TwapConfig: IComponent<{
   interval: string;
@@ -17,21 +21,23 @@ const TwapConfig: IComponent<{
   totalOrders: string;
   setTotalOrders: (value: string) => void;
 }> = ({ interval, setInterval, totalOrders, setTotalOrders }) => {
-  const isValidPositiveInteger = (val: string) => {
-    return /^[1-9]\d*$/.test(val);
-  };
+  const handleIntervalChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isValidPositiveInteger(e.target.value)) {
+        setInterval(e.target.value);
+      }
+    },
+    [setInterval],
+  );
 
-  const handleIntervalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isValidPositiveInteger(e.target.value)) {
-      setInterval(e.target.value);
-    }
-  };
-
-  const handleTotalOrdersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isValidPositiveInteger(e.target.value)) {
-      setTotalOrders(e.target.value);
-    }
-  };
+  const handleTotalOrdersChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isValidPositiveInteger(e.target.value)) {
+        setTotalOrders(e.target.value);
+      }
+    },
+    [setTotalOrders],
+  );
 
   return (
     <div className="flex flex-col divide-y-[2px] divide-purple3 bg-purple3">
@@ -115,11 +121,14 @@ export const TwapOrder = () => {
     totalOrders,
   });
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (/^\d*\.?\d*$/.test(e.target.value)) {
-      setAmount(e.target.value);
-    }
-  };
+  const handleAmountChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (/^\d*\.?\d*$/.test(e.target.value)) {
+        setAmount(e.target.value);
+      }
+    },
+    [],
+  );
 
   return (
     <BaseOrder

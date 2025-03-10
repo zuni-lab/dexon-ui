@@ -6,6 +6,10 @@ interface OrderDetails {
   token_name: WrappedTradeableToken;
   amount: string;
   order_side: OrderSide;
+
+  // for TWAP
+  interval?: string;
+  total_orders?: string;
 }
 
 type OrderType = "MARKET" | "LIMIT" | "STOP" | "TWAP";

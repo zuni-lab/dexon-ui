@@ -2,6 +2,8 @@ import { parseOrderDetails, parseUnknownMessage } from "@/utils/order";
 import { cn } from "@/utils/shadcn";
 import { format } from "date-fns";
 import { type ReactNode, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { BotAvatar } from "./BotAvatar";
 import { OrderPreview } from "./Preview";
 
@@ -61,14 +63,21 @@ const BotMessage: IComponent<{ message: ChatMessage; isTyping?: boolean }> = ({
     const parsedMessage = parseUnknownMessage(message.text);
     return (
       <div
-        className={cn("rounded-2xl px-4 py-2 font-medium", {
+        className={cn("rounded-2xl px-4 py-2", {
           "bg-purple4/40": parsedMessage.text,
         })}
       >
-        {isTyping ? (
+        {isTyping && parsedMessage.beAbleOrder ? (
           <p className="animate-pulse">▊</p>
         ) : (
-          <p>{parsedMessage.text}</p>
+          <div className="markdown-content">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={MarkdownComponents}
+            >
+              {parsedMessage.text}
+            </ReactMarkdown>
+          </div>
         )}
         <span className="mt-1 block text-xs opacity-70">
           {format(message.created_at * 1000, "HH:mm")}
@@ -107,3 +116,34 @@ export const ChatMessages: IComponent<ChatMessagesProps> = ({
     )}
   </div>
 );
+
+const MarkdownComponents = {
+  h1: ({ ...props }) => (
+    <h1
+      className="my-4 border-purple-400/30 border-b pb-2 font-bold text-2xl text-purple-300"
+      {...props}
+    />
+  ),
+  h2: ({ ...props }) => (
+    <h2
+      className="my-3 border-purple-400/20 border-b pb-1 font-bold text-purple-200 text-xl"
+      {...props}
+    />
+  ),
+  h3: ({ ...props }) => (
+    <h3 className="my-2 font-bold text-lg text-purple-100" {...props} />
+  ),
+  h4: ({ ...props }) => (
+    <h4 className="my-2 font-semibold text-base text-purple-100" {...props} />
+  ),
+  h5: ({ ...props }) => (
+    <h5 className="my-1 font-semibold text-purple-100 text-sm" {...props} />
+  ),
+  h6: ({ ...props }) => (
+    <h6 className="my-1 font-semibold text-purple-100 text-xs" {...props} />
+  ),
+  strong: ({ ...props }) => (
+    <strong className="my-2 font-extrabold text-lg text-white" {...props} />
+  ),
+  p: ({ ...props }) => <p className="" {...props} />,
+};

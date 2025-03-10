@@ -157,3 +157,21 @@ export const cleanupJsonString = (jsonString: string): string => {
     return jsonString;
   }
 };
+
+export const isValidJson = (str: string): boolean => {
+  // Remove any potential Unicode BOM and whitespace
+  const trimmed = str.trim().replace(/^\uFEFF/, "");
+
+  // Basic JSON structure validation
+  const jsonRegex = /^[\],:{}\s]*$/;
+
+  return jsonRegex.test(
+    trimmed
+      .replace(/\\["\\\/bfnrtu]/g, "@")
+      .replace(
+        /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+        "]",
+      )
+      .replace(/(?:^|:|,)(?:\s*\[)+/g, ""),
+  );
+};

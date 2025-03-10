@@ -32,4 +32,7 @@ interface PlaceOrderRequest {
   deadline: number;
   slippage: number;
   signature: Hex;
+  twapIntervalSeconds?: number;
+  twapExecutedTimes?: number;
+  twapStartedAt?: number;
 }

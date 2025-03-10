@@ -37,6 +37,21 @@ export const DEXON_TYPED_DATA = {
     },
     primaryType: "Order",
   },
+  TwapOrder: {
+    types: {
+      TwapOrder: [
+        { name: "account", type: "address" },
+        { name: "nonce", type: "uint256" },
+        { name: "path", type: "bytes" },
+        { name: "amount", type: "uint256" },
+        { name: "orderSide", type: "uint8" },
+        { name: "interval", type: "uint256" },
+        { name: "totalOrders", type: "uint256" },
+        { name: "startTimestamp", type: "uint256" },
+      ],
+    },
+    primaryType: "TwapOrder",
+  },
 } as const;
 
 export enum TriggerEnum {

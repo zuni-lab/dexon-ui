@@ -40,6 +40,7 @@ export const TradingTabs: IComponent = () => {
       <OrderContent value="MARKET" />
       <OrderContent value="LIMIT" />
       <OrderContent value="STOP" />
+      <OrderContent value="TWAP" />
     </Tabs>
   );
 };

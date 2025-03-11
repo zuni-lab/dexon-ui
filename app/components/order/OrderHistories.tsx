@@ -251,7 +251,16 @@ const OrdersTable: IComponent<{
                     ) : (
                       <TableCell className="pe-2 text-right">
                         <div className="flex items-center justify-end">
-                          <div className="capitalize">
+                          <div
+                            className={cn("capitalize", {
+                              "text-green-500": order.status === "FILLED",
+                              "text-red-500":
+                                order.status === "CANCELLED" ||
+                                order.status === "REJECTED",
+                              "text-yellow-500": order.status === "PENDING",
+                              "text-sky-500": order.status === "PARTIAL_FILLED",
+                            })}
+                          >
                             {snakeCaseToReadable(order.status?.toLowerCase())}
                           </div>
                           {order.type === "TWAP" &&

@@ -6,7 +6,7 @@ export const validateOrderDetails = (order: OrderDetails) => {
     !order.amount ||
     !order.order_side
   ) {
-    throw new Error("Missing required fields");
+    throw new Error("Missing normal order required fields");
   }
 
   if (!["<", ">", "="].includes(order.trigger_condition)) {
@@ -32,7 +32,54 @@ export const validateOrderDetails = (order: OrderDetails) => {
   return true;
 };
 
+export const validateTwapOrderDetails = (order: OrderDetails) => {
+  if (order.trigger_condition || order.trigger_price) {
+    throw new Error("Invalid trigger condition or trigger price");
+  }
+
+  if (
+    !order.token_name ||
+    !order.amount ||
+    !order.order_side ||
+    !order.interval ||
+    !order.total_orders
+  ) {
+    throw new Error("Missing TWAP required fields");
+  }
+
+  if (!/^\d+(\.\d+)?$/.test(order.amount)) {
+    throw new Error("Invalid amount");
+  }
+
+  if (!["BUY", "SELL"].includes(order.order_side)) {
+    throw new Error("Invalid order side");
+  }
+
+  if (!["WBTC", "WETH", "WSOL"].includes(order.token_name)) {
+    throw new Error("Invalid token name");
+  }
+
+  if (!/^\d+$/.test(order.interval)) {
+    throw new Error("Invalid interval");
+  }
+
+  if (!/^\d+$/.test(order.total_orders)) {
+    throw new Error("Invalid total orders");
+  }
+
+  return true;
+};
+
 export function determineOrderType(order: OrderDetails): OrderType {
+  if (
+    order.interval &&
+    order.total_orders &&
+    !order.trigger_condition &&
+    !order.trigger_price
+  ) {
+    return "TWAP";
+  }
+
   if (order.trigger_condition === "=") {
     return "MARKET";
   }
@@ -55,9 +102,11 @@ export function parseOrderDetails(jsonString: string): OrderDetails | null {
   try {
     const trimmed = trimMessage(jsonString);
     const order = JSON.parse(trimmed) as OrderDetails;
-    const isValid = isValidOrderDetails(order);
-    if (!isValid) {
-      return null;
+    const orderType = determineOrderType(order);
+    if (orderType === "TWAP") {
+      validateTwapOrderDetails(order);
+    } else {
+      validateOrderDetails(order);
     }
     return order;
   } catch (_e) {
@@ -98,23 +147,6 @@ export function parseUnknownMessage(jsonString: string): {
     };
   }
 }
-
-export const isValidOrderDetails = (order: OrderDetails) => {
-  try {
-    if (
-      !order.trigger_condition ||
-      !order.trigger_price ||
-      !order.token_name ||
-      !order.amount ||
-      !order.order_side
-    ) {
-      return false;
-    }
-    return true;
-  } catch (_e) {
-    return false;
-  }
-};
 
 const trimMessage = (jsonString: string) => {
   let trimmed = jsonString.trim();

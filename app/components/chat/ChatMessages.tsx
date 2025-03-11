@@ -69,7 +69,7 @@ const BotMessage: IComponent<{ message: ChatMessage; isTyping?: boolean }> = ({
       >
         {isTyping && parsedMessage.beAbleOrder ? (
           <p className="animate-pulse">▊</p>
-        ) : (
+        ) : parsedMessage.text ? (
           <div className="markdown-content">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -78,6 +78,10 @@ const BotMessage: IComponent<{ message: ChatMessage; isTyping?: boolean }> = ({
               {parsedMessage.text}
             </ReactMarkdown>
           </div>
+        ) : (
+          <span className="rounded-full border border-red/60 p-1 px-2">
+            Any error with this message
+          </span>
         )}
         <span className="mt-1 block text-xs opacity-70">
           {format(message.created_at * 1000, "HH:mm")}

@@ -18,7 +18,7 @@ const TRADING_EXAMPLES: Example[] = [
   },
   {
     key: "buy-eth-twap",
-    content: "Buy 10 ETH using TWAP in 1 hour",
+    content: "Buy 10 ETH using TWAP by 10 orders every half a day",
   },
 ];
 

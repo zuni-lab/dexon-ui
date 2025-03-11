@@ -2,42 +2,39 @@
 
 import { dexonService } from "@/api/dexon";
 import { DEXON_ADDRESS } from "@/constants/contracts";
-import {
-  DEXON_TYPED_DATA,
-  OrderSideMapping,
-  OrderTypeMapping,
-} from "@/constants/orders";
+import { DEXON_TYPED_DATA, OrderSideMapping } from "@/constants/orders";
 import { Tokens } from "@/constants/tokens";
 import { findPaths, findPoolIds } from "@/utils/dex";
+import { getCurrentUnixTime } from "@/utils/tools";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { parseUnits } from "viem";
+import { maxUint256, parseUnits } from "viem";
 import { useAccount, usePublicClient, useSignTypedData } from "wagmi";
 import { useApproveToken } from "./useApproveToken";
 
-interface UsePlaceOrderProps {
+interface UseTwapPlaceOrderProps {
   amount: string;
   orderSide: OrderSide;
-  orderType: Exclude<OrderType, "MARKET" | "TWAP">;
   selectedToken: Token;
-  triggerPrice: string;
+  interval: string;
+  totalOrders: string;
 }
 
-export const usePlaceOrder = ({
+export const usePlaceTwapOrder = ({
   amount,
   orderSide,
-  orderType,
   selectedToken,
-  triggerPrice,
-}: UsePlaceOrderProps) => {
+  interval,
+  totalOrders,
+}: UseTwapPlaceOrderProps) => {
   const [isPending, setIsPending] = useState(false);
   const { address } = useAccount();
   const publicClient = usePublicClient();
   const { signTypedDataAsync } = useSignTypedData();
+  const { approveToken } = useApproveToken();
 
   const queryClient = useQueryClient();
-  const { approveToken } = useApproveToken();
   const { mutateAsync: placeOrderApi } = useMutation({
     mutationFn: (order: PlaceOrderRequest) => dexonService.placeOrder(order),
     onSuccess: () => {
@@ -47,7 +44,7 @@ export const usePlaceOrder = ({
     },
   });
 
-  const placeOrder = useCallback(async () => {
+  const placeTwapOrder = useCallback(async () => {
     if (!address) {
       toast.error("Please connect your wallet");
       return;
@@ -58,8 +55,13 @@ export const usePlaceOrder = ({
       return;
     }
 
-    if (!triggerPrice || Number(triggerPrice) === 0) {
-      toast.error("Please enter a valid trigger price");
+    if (!interval || Number(interval) === 0) {
+      toast.error("Please enter a valid interval");
+      return;
+    }
+
+    if (!totalOrders || Number(totalOrders) === 0) {
+      toast.error("Please enter a valid total orders");
       return;
     }
 
@@ -72,26 +74,16 @@ export const usePlaceOrder = ({
       // Get path for token swap
       const path = findPaths(selectedToken.address, Tokens.USDC.address);
 
-      // TODO: Make these configurable in UI
-      const slippage = 0.1;
-      const deadline = 4102444800n;
-
       if (!publicClient) {
         throw new Error("Public client not found");
       }
 
       // Check and handle token approvals
       if (orderSide === "BUY") {
-        const maxUsdcAmount = (
-          Number(amount) *
-          Number(triggerPrice) *
-          (1 + slippage)
-        ).toString();
-        const useAmount = parseUnits(maxUsdcAmount, Tokens.USDC.decimals);
         await approveToken({
           token: Tokens.USDC.address,
           spender: DEXON_ADDRESS,
-          amount: useAmount,
+          amount: maxUint256,
         });
       } else {
         const useAmount = parseUnits(amount, selectedToken.decimals);
@@ -113,11 +105,10 @@ export const usePlaceOrder = ({
         nonce,
         path,
         amount: parseUnits(amount, selectedToken.decimals),
-        triggerPrice: parseUnits(triggerPrice, 18),
-        slippage: parseUnits(slippage.toString(), 6),
-        orderType: OrderTypeMapping[orderType],
         orderSide: OrderSideMapping[orderSide],
-        deadline,
+        interval: BigInt(interval) * BigInt(60),
+        totalOrders: BigInt(totalOrders),
+        startTimestamp: BigInt(getCurrentUnixTime() + 120),
       };
 
       // Sign order with EIP-712
@@ -128,30 +119,37 @@ export const usePlaceOrder = ({
           chainId: domain.chainId,
           verifyingContract: domain.verifyingContract,
         },
-        types: DEXON_TYPED_DATA.Order.types,
-        primaryType: DEXON_TYPED_DATA.Order.primaryType,
+        types: DEXON_TYPED_DATA.TwapOrder.types,
+        primaryType: DEXON_TYPED_DATA.TwapOrder.primaryType,
         message: order,
       });
+
+      if (Number(order.startTimestamp) < getCurrentUnixTime()) {
+        throw new Error("Signature expired");
+      }
 
       const { status } = await placeOrderApi({
         wallet: order.account,
         nonce: order.nonce.toString(),
         poolIds: findPoolIds(selectedToken.address, Tokens.USDC.address),
         side: orderSide,
-        type: orderType,
-        price: triggerPrice,
+        type: "TWAP",
+        price: "0",
         amount: order.amount.toString(),
         paths: order.path,
-        deadline: Number(order.deadline),
-        slippage,
+        deadline: new Date().getTime(),
+        slippage: 0,
         signature,
+        twapExecutedTimes: Number(order.totalOrders),
+        twapIntervalSeconds: Number(order.interval),
+        twapStartedAt: Number(order.startTimestamp),
       });
 
       if (status !== 200) {
         throw new Error("Failed to submit order");
       }
 
-      toast.success(`${orderType} order placed successfully!`);
+      toast.success("TWAP order placed successfully!");
     } catch (_error) {
       toast.error("Failed to place order");
     } finally {
@@ -162,16 +160,16 @@ export const usePlaceOrder = ({
     amount,
     approveToken,
     orderSide,
-    orderType,
     placeOrderApi,
     publicClient,
     selectedToken,
     signTypedDataAsync,
-    triggerPrice,
+    interval,
+    totalOrders,
   ]);
 
   return {
-    placeOrder,
+    placeTwapOrder,
     isPending,
   };
 };

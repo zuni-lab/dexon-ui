@@ -7,6 +7,7 @@ import { cn } from "@/utils/shadcn";
 import { createContext, use, useState } from "react";
 import { ConditionOrder } from "./ConditionOrder";
 import { MarketOrder } from "./MarketOrder";
+import { TwapOrder } from "./TwapOrder";
 export const OrderSideContext = createContext<OrderSide | null>(null);
 
 export const useOrderSide = () => {
@@ -45,6 +46,7 @@ export const OrderWrapper: IComponent<OrderWrapperProps> = ({ type }) => {
         {type === "MARKET" && <MarketOrder />}
         {type === "LIMIT" && <ConditionOrder orderType="LIMIT" />}
         {type === "STOP" && <ConditionOrder orderType="STOP" />}
+        {type === "TWAP" && <TwapOrder />}
       </div>
     </OrderSideContext.Provider>
   );

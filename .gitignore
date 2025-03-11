@@ -54,3 +54,5 @@ yarn-error.log*
 
 # cache
 .eslintcache
+
+.idea

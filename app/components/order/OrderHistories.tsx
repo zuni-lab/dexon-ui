@@ -254,7 +254,7 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
         wallet: address!,
         offset: (openPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
-        status: ["PENDING"],
+        status: ["PENDING", "PARTIAL_FILLED"],
       });
     },
     enabled: !!address,
@@ -268,7 +268,7 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
         wallet: address!,
         offset: (historyPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
-        notStatus: ["PENDING"],
+        notStatus: ["PENDING", "PARTIAL_FILLED"],
       });
     },
     enabled: !!address,

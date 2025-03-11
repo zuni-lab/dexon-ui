@@ -4,6 +4,11 @@ import { TOrder, dexonService } from "@/api/dexon";
 import { TooltipWrapper } from "@/components/TooltipWrapper";
 import { Button } from "@/components/shadcn/Button";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/shadcn/Collapsible";
+import {
   Table,
   TableBody,
   TableCell,
@@ -18,11 +23,15 @@ import {
   TabsTrigger,
 } from "@/components/shadcn/Tabs";
 import { ITEMS_PER_PAGE } from "@/constants/orders";
-import { getTokenPairFromPath } from "@/utils/dex";
 import { cn } from "@/utils/shadcn";
-import { formatNumber, getForrmattedFullDate } from "@/utils/tools";
+import {
+  formatNumber,
+  formatTimeInterval,
+  getForrmattedFullDate,
+  snakeCaseToReadable,
+} from "@/utils/tools";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, FileSearch, Trash2 } from "lucide-react";
+import { ChevronDown, ExternalLink, FileSearch, Trash2 } from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -45,7 +54,6 @@ const TabButton: IComponent<{ value: OrderTab; label: string }> = ({
   );
 };
 
-// Add pagination props to OrdersTable
 const OrdersTable: IComponent<{
   orders?: TOrder[];
   value: OrderTab;
@@ -61,6 +69,42 @@ const OrdersTable: IComponent<{
   totalPages,
   onPageChange,
 }) => {
+  const { address } = useAccount();
+  const [expandedOrders, setExpandedOrders] = useState<Record<number, boolean>>(
+    {},
+  );
+  const [twapSubOrdersMap, setTwapSubOrdersMap] = useState<
+    Record<number, TOrder[]>
+  >({});
+
+  useQuery({
+    queryKey: [
+      "TWAP",
+      address,
+      Object.keys(expandedOrders).filter((key) => expandedOrders[Number(key)]),
+    ],
+    queryFn: async () => {
+      const expandedOrderIds = Object.keys(expandedOrders)
+        .filter((key) => expandedOrders[Number(key)])
+        .map(Number);
+
+      const results: Record<number, TOrder[]> = {};
+      await Promise.all(
+        expandedOrderIds.map(async (orderId) => {
+          const data = await dexonService.getTwapSubOrders({
+            wallet: address!,
+            parentId: orderId,
+          });
+          results[orderId] = data;
+        }),
+      );
+      setTwapSubOrdersMap(results);
+      return results;
+    },
+    enabled: !!address && Object.values(expandedOrders).some((v) => v),
+    refetchInterval: 5000,
+  });
+
   if (!orders) {
     return null;
   }
@@ -112,6 +156,12 @@ const OrdersTable: IComponent<{
                   Actual Total
                 </TableHead>
               )}
+              <TableHead className="text-center text-gray-400 text-sm">
+                Twap Executed
+              </TableHead>
+              <TableHead className="text-center text-gray-400 text-sm">
+                Twap Interval
+              </TableHead>
               {value === "OPEN" ? (
                 <TableHead className="text-right text-gray-400 text-sm">
                   Cancel
@@ -125,85 +175,207 @@ const OrdersTable: IComponent<{
           </TableHeader>
           <TableBody className="font-semibold">
             {orders.map((order) => (
-              <TableRow
-                key={order.id}
-                className={cn(
-                  "border-gray-500 border-b-[1px] transition-colors hover:bg-secondary/50",
-                  order.status === "CANCELLED" && "opacity-50",
-                )}
-              >
-                <TableCell className="w-1/6">
-                  {getForrmattedFullDate(order.createdAt)}
-                </TableCell>
-                <TableCell className="w-1/6">
-                  {getTokenPairFromPath(order.paths)}
-                </TableCell>
-                <TableCell className={"capitalize"}>
-                  <span className={"rounded px-2 py-1"}>
-                    {order.type.toLowerCase()}
-                  </span>
-                </TableCell>
-                <TableCell
-                  className={cn(
-                    "capitalize",
-                    order.side === "BUY" ? "text-green-500" : "text-red-500",
-                  )}
-                >
-                  {order.side.toLowerCase()}
-                </TableCell>
-                <TableCell className="text-center">
-                  {`${formatNumber(order.amount)} ${
-                    getTokenPairFromPath(order.paths).split("/")[0]
-                  }`}
-                </TableCell>
-                <TableCell className="text-center">
-                  {`${condition(order.type, order.side)} ${formatNumber(order.price)} USDC`}
-                </TableCell>
-                {value === "OPEN" ? (
-                  <TableCell className="text-center">
-                    {`${formatNumber(order.amount * order.price)} USDC`}
-                  </TableCell>
-                ) : (
-                  <TableCell className="text-center">
-                    {order.actualAmount
-                      ? `${formatNumber(order.actualAmount)} USDC`
-                      : "-"}
-                  </TableCell>
-                )}
-                {value === "OPEN" ? (
-                  <TableCell className="text-right">
-                    <TooltipWrapper text="Cancel Order" side="right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-right text-white/70 hover:text-white"
-                        onClick={() => cancelOrder(order.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipWrapper>
-                  </TableCell>
-                ) : (
-                  <TableCell
+              <Collapsible key={order.id} asChild>
+                <>
+                  <TableRow
                     className={cn(
-                      "capitalize",
-                      // order.status === "CANCELLED" && "text-amber-500",
+                      "border-gray-500 border-b-[1px] transition-colors hover:bg-secondary/50",
+                      order.status === "CANCELLED" && "opacity-50",
                     )}
                   >
-                    <div className="flex items-center justify-end gap-2">
-                      <div>{order.status.toLowerCase()}</div>
-                      {order.status !== "CANCELLED" && (
-                        <Link
-                          href={`https://testnet.monadexplorer.com/tx/${order.txHash}`}
-                          target="_blank"
-                        >
-                          <ExternalLink size={20} className="ms-1 mb-1" />
-                        </Link>
+                    <TableCell>
+                      {getForrmattedFullDate(order.createdAt)}
+                    </TableCell>
+                    <TableCell>{order.pair}</TableCell>
+                    <TableCell className="capitalize">
+                      {order.type.toLowerCase()}
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "capitalize",
+                        order.side === "BUY"
+                          ? "text-green-500"
+                          : "text-red-500",
                       )}
-                    </div>
-                  </TableCell>
-                )}
-              </TableRow>
+                    >
+                      {order.side.toLowerCase()}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {`${formatNumber(order.amount)} ${
+                        order.pair.split("/")[0]
+                      }`}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {order.type === "TWAP"
+                        ? "-"
+                        : `${condition(order.type, order.side)} ${formatNumber(
+                            order.price,
+                          )} USDC`}
+                    </TableCell>
+                    {value === "OPEN" ? (
+                      <TableCell className="text-center">
+                        {order.type === "TWAP"
+                          ? "-"
+                          : `${formatNumber(order.amount * order.price)} USDC`}
+                      </TableCell>
+                    ) : (
+                      <TableCell className="text-center">
+                        {order.actualAmount
+                          ? `${formatNumber(order.actualAmount)} USDC`
+                          : "-"}
+                      </TableCell>
+                    )}
+                    <TableCell className="text-center">
+                      {order.type === "TWAP"
+                        ? `${order.twapCurrentExecutedTimes}/${order.twapExecutedTimes}`
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {order.type === "TWAP"
+                        ? formatTimeInterval(order.twapIntervalSeconds / 60)
+                        : "-"}
+                    </TableCell>
+                    {value === "OPEN" ? (
+                      <TableCell className="text-right">
+                        <TooltipWrapper text="Cancel Order" side="right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-right text-white/70 hover:text-white"
+                            onClick={() => cancelOrder(order.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipWrapper>
+                      </TableCell>
+                    ) : (
+                      <TableCell className="pe-2 text-right">
+                        <div className="flex items-center justify-end">
+                          <div className="capitalize">
+                            {snakeCaseToReadable(order.status?.toLowerCase())}
+                          </div>
+                          {order.type === "TWAP" &&
+                            order.twapCurrentExecutedTimes > 0 && (
+                              <CollapsibleTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    setExpandedOrders((prev) => ({
+                                      ...prev,
+                                      [order.id]: !prev[order.id],
+                                    }))
+                                  }
+                                  className="h-6 w-6 text-right text-white/70 transition-transform hover:text-white data-[state=open]:rotate-180"
+                                >
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </CollapsibleTrigger>
+                            )}
+                          {order.type !== "TWAP" && order.txHash && (
+                            <Link
+                              href={`https://testnet.monadexplorer.com/tx/${order.txHash}`}
+                              target="_blank"
+                            >
+                              <ExternalLink size={20} className="ms-1 mb-1" />
+                            </Link>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                  <CollapsibleContent asChild>
+                    <TableRow className="bg-secondary/20">
+                      <TableCell colSpan={10}>
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="border-none font-semibold">
+                              <TableHead className="text-gray-400 text-sm">
+                                No. of orders
+                              </TableHead>
+                              <TableHead className="text-gray-400 text-sm">
+                                Date
+                              </TableHead>
+                              <TableHead className="text-gray-400 text-sm">
+                                Pair
+                              </TableHead>
+                              <TableHead className="text-gray-400 text-sm">
+                                Type
+                              </TableHead>
+                              <TableHead className="text-gray-400 text-sm">
+                                Side
+                              </TableHead>
+                              <TableHead className="text-gray-400 text-sm">
+                                Amount
+                              </TableHead>
+                              <TableHead className="text-gray-400 text-sm">
+                                Actual Total
+                              </TableHead>
+                              <TableHead className="text-gray-400 text-sm">
+                                Status
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {twapSubOrdersMap[order.id]?.map(
+                              (childOrder, index) => (
+                                <TableRow
+                                  key={order.id}
+                                  className="border-gray-500/50 border-b-[1px]"
+                                >
+                                  <TableCell>
+                                    {twapSubOrdersMap[order.id]?.length - index}
+                                  </TableCell>
+                                  <TableCell>
+                                    {getForrmattedFullDate(
+                                      childOrder.createdAt,
+                                    )}
+                                  </TableCell>
+                                  <TableCell>{childOrder.pair}</TableCell>
+                                  <TableCell>Sub Twap</TableCell>
+                                  <TableCell className="capitalize">
+                                    {childOrder.side.toLowerCase()}
+                                  </TableCell>
+                                  <TableCell>
+                                    {`${formatNumber(
+                                      childOrder.amount,
+                                    )} ${childOrder.pair.split("/")[0]}`}
+                                  </TableCell>
+                                  <TableCell>
+                                    {childOrder.actualAmount
+                                      ? `${formatNumber(
+                                          childOrder.actualAmount,
+                                        )} USDC`
+                                      : "-"}
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center">
+                                      <div className="capitalize">
+                                        {childOrder.status?.toLowerCase()}
+                                      </div>
+                                      {childOrder.txHash && (
+                                        <Link
+                                          href={`https://testnet.monadexplorer.com/tx/${childOrder.txHash}`}
+                                          target="_blank"
+                                        >
+                                          <ExternalLink
+                                            size={20}
+                                            className="ms-4 mb-1"
+                                          />
+                                        </Link>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ),
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableCell>
+                    </TableRow>
+                  </CollapsibleContent>
+                </>
+              </Collapsible>
             ))}
           </TableBody>
         </Table>
@@ -268,7 +440,7 @@ export const OrderHistories: IComponent<{ className?: string }> = ({
         wallet: address!,
         offset: (historyPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
-        notStatus: ["PENDING", "PARTIAL_FILLED"],
+        notStatus: ["PENDING"],
       });
     },
     enabled: !!address,

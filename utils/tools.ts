@@ -94,6 +94,10 @@ export const toQueryString = (params: object) => {
     .join("&");
 };
 
+export const snakeCaseToReadable = (str: string) => {
+  return str.split("_").join(" ");
+};
+
 export function formatTimeInterval(minutes: number): string {
   if (!minutes) return "0 minutes";
 

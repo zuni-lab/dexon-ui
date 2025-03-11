@@ -12,6 +12,10 @@ interface OrderResponse {
   side: OrderSide;
   price: number;
   amount: string;
+  actualAmount: number;
+  twapExecutedTimes: number;
+  twapCurrentExecutedTimes: number;
+  twapIntervalSeconds: number;
   paths: `0x${string}`;
   createdAt: string;
   cancelledAt: string | null;

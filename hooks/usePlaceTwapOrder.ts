@@ -108,7 +108,7 @@ export const usePlaceTwapOrder = ({
         orderSide: OrderSideMapping[orderSide],
         interval: BigInt(interval) * BigInt(60),
         totalOrders: BigInt(totalOrders),
-        startTimestamp: BigInt(getCurrentUnixTime() + 120),
+        startTimestamp: BigInt(getCurrentUnixTime() + 10),
       };
 
       // Sign order with EIP-712

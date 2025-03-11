@@ -1,8 +1,7 @@
 import { ITEMS_PER_PAGE } from "@/constants/orders";
-import { Tokens } from "@/constants/tokens";
-import { formatAmountWithPath } from "@/utils/dex";
+import { formatAmountWithPath, getTokenPairFromPath } from "@/utils/dex";
 import { toQueryString } from "@/utils/tools";
-import { type Hex, formatUnits } from "viem";
+import { type Hex } from "viem";
 import { apiClient } from "./axios";
 
 interface PaginationResponse<T> {
@@ -11,9 +10,8 @@ interface PaginationResponse<T> {
 }
 
 export type TOrder = OrderResponse & {
+  pair: string;
   amount: number;
-  price: number;
-  actualAmount?: number;
 };
 
 export const dexonService = {
@@ -33,10 +31,35 @@ export const dexonService = {
     const orders = data.data.map((order) => {
       return {
         ...order,
+        pair: getTokenPairFromPath(order.paths),
         amount: Number(formatAmountWithPath(order.paths, BigInt(order.amount))),
       } as TOrder;
     });
     return { orders, total: data.total };
+  },
+  async getTwapSubOrders(params: {
+    wallet: Hex;
+    parentId: number;
+    offset?: number;
+    limit?: number;
+  }) {
+    if (!params.limit) {
+      params.limit = 100;
+    }
+    if (!params.offset) {
+      params.offset = 0;
+    }
+    const { data } = await apiClient.get<PaginationResponse<OrderResponse>>(
+      `/api/orders?${toQueryString(params)}`,
+    );
+    const orders = data.data.map((order) => {
+      return {
+        ...order,
+        pair: getTokenPairFromPath(order.paths),
+        amount: Number(formatAmountWithPath(order.paths, BigInt(order.amount))),
+      } as TOrder;
+    });
+    return orders;
   },
   placeOrder(order: PlaceOrderRequest) {
     return apiClient.post("/api/orders", order);

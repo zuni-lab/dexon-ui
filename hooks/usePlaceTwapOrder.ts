@@ -2,23 +2,14 @@
 
 import { dexonService } from "@/api/dexon";
 import { DEXON_ADDRESS } from "@/constants/contracts";
-import {
-  DEXON_TYPED_DATA,
-  OrderSideMapping,
-  OrderTypeMapping,
-} from "@/constants/orders";
+import { DEXON_TYPED_DATA, OrderSideMapping } from "@/constants/orders";
 import { Tokens } from "@/constants/tokens";
 import { findPaths, findPoolIds } from "@/utils/dex";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { maxUint256, parseUnits } from "viem";
-import {
-  useAccount,
-  useConfig,
-  usePublicClient,
-  useSignTypedData,
-} from "wagmi";
+import { useAccount, usePublicClient, useSignTypedData } from "wagmi";
 import { useApproveToken } from "./useApproveToken";
 
 interface UseTwapPlaceOrderProps {
@@ -39,7 +30,6 @@ export const usePlaceTwapOrder = ({
   const [isPending, setIsPending] = useState(false);
   const { address } = useAccount();
   const publicClient = usePublicClient();
-  const config = useConfig();
   const { signTypedDataAsync } = useSignTypedData();
   const { approveToken } = useApproveToken();
 
@@ -57,10 +47,6 @@ export const usePlaceTwapOrder = ({
     if (!address) {
       toast.error("Please connect your wallet");
       return;
-    }
-
-    if (!config) {
-      throw new Error("Config not found");
     }
 
     if (!amount || Number(amount) === 0) {
@@ -121,9 +107,7 @@ export const usePlaceTwapOrder = ({
         orderSide: OrderSideMapping[orderSide],
         interval: BigInt(interval) * BigInt(60),
         totalOrders: BigInt(totalOrders),
-        startTimestamp: BigInt(
-          Math.floor(new Date().getTime() / 1000) + 2 * 60,
-        ),
+        startTimestamp: BigInt(Math.floor(new Date().getTime() / 1000) + 10),
       };
 
       // Sign order with EIP-712
@@ -148,7 +132,7 @@ export const usePlaceTwapOrder = ({
         price: "0",
         amount: order.amount.toString(),
         paths: order.path,
-        deadline: new Date().getTime() + 24000 * 3600000,
+        deadline: 0,
         slippage: 0,
         signature,
         twapExecutedTimes: Number(order.totalOrders),
@@ -170,7 +154,6 @@ export const usePlaceTwapOrder = ({
     address,
     amount,
     approveToken,
-    config,
     orderSide,
     placeOrderApi,
     publicClient,

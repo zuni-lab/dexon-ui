@@ -13,12 +13,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { parseUnits } from "viem";
-import {
-  useAccount,
-  useConfig,
-  usePublicClient,
-  useSignTypedData,
-} from "wagmi";
+import { useAccount, usePublicClient, useSignTypedData } from "wagmi";
 import { useApproveToken } from "./useApproveToken";
 
 interface UsePlaceOrderProps {
@@ -39,7 +34,6 @@ export const usePlaceOrder = ({
   const [isPending, setIsPending] = useState(false);
   const { address } = useAccount();
   const publicClient = usePublicClient();
-  const config = useConfig();
   const { signTypedDataAsync } = useSignTypedData();
 
   const queryClient = useQueryClient();
@@ -57,10 +51,6 @@ export const usePlaceOrder = ({
     if (!address) {
       toast.error("Please connect your wallet");
       return;
-    }
-
-    if (!config) {
-      throw new Error("Config not found");
     }
 
     if (!amount || Number(amount) === 0) {
@@ -171,7 +161,6 @@ export const usePlaceOrder = ({
     address,
     amount,
     approveToken,
-    config,
     orderSide,
     orderType,
     placeOrderApi,

@@ -5,6 +5,7 @@ import { DEXON_ADDRESS } from "@/constants/contracts";
 import { DEXON_TYPED_DATA, OrderSideMapping } from "@/constants/orders";
 import { Tokens } from "@/constants/tokens";
 import { findPaths, findPoolIds } from "@/utils/dex";
+import { getCurrentUnixTime } from "@/utils/tools";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -107,7 +108,7 @@ export const usePlaceTwapOrder = ({
         orderSide: OrderSideMapping[orderSide],
         interval: BigInt(interval) * BigInt(60),
         totalOrders: BigInt(totalOrders),
-        startTimestamp: BigInt(Math.floor(new Date().getTime() / 1000) + 10),
+        startTimestamp: BigInt(getCurrentUnixTime() + 120),
       };
 
       // Sign order with EIP-712
@@ -123,6 +124,10 @@ export const usePlaceTwapOrder = ({
         message: order,
       });
 
+      if (Number(order.startTimestamp) < getCurrentUnixTime()) {
+        throw new Error("Signature expired");
+      }
+
       const { status } = await placeOrderApi({
         wallet: order.account,
         nonce: order.nonce.toString(),
@@ -132,7 +137,7 @@ export const usePlaceTwapOrder = ({
         price: "0",
         amount: order.amount.toString(),
         paths: order.path,
-        deadline: 0,
+        deadline: new Date().getTime(),
         slippage: 0,
         signature,
         twapExecutedTimes: Number(order.totalOrders),

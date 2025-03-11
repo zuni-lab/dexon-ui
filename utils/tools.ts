@@ -29,6 +29,10 @@ export const getFormattedDate = (inputDate: string | number) => {
   return date.isValid() ? formattedDate : "Never";
 };
 
+export const getCurrentUnixTime = () => {
+  return moment().unix();
+};
+
 export const toUtcTime = (date: Date) => {
   const time = new Date(date);
   time.setMinutes(time.getMinutes() - time.getTimezoneOffset());

@@ -8,6 +8,7 @@ export const UNISWAP_QUOTER_V2_ADDRESS =
   "0x1b4e313fef15630af3e6f2de550dbf4cc9d3081d";
 export const UNISWAP_SWAP_ROUTER_ADDRESS =
   "0x4c4eabd5fb1d1a7234a48692551eaecff8194ca7";
+export const FAUCET_ADDRESS = "0xbf5f0cf6b6cee106047af9fd26415ce97baa7f4e";
 
 export const UNISWAP_V3_POOLS: Pool[] = [
   {

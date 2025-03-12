@@ -3,6 +3,7 @@
 import { Button } from "@/components/shadcn/Button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -20,6 +21,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useWriteContract } from "wagmi";
 import ConnectWallet from "./ConnectWallet";
+import { Faucet } from "./icons/Faucet";
 import { LogoSvg } from "./icons/LogoSvg";
 import { SettingIcon } from "./icons/Setting";
 
@@ -37,13 +39,13 @@ export default function Header() {
         <LogoSvg />
       </Link>
       <div className="flex items-center gap-3">
-        <Dialog open={open}>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
-              className="h-12 rounded-full bg-primary px-6 text-gray-100 text-lg hover:bg-primary/90"
+              className="!p-0 h-12 w-12 rounded-full bg-primary pt-1 text-gray-100 text-lg hover:bg-primary/90"
               onClick={() => setOpen(true)}
             >
-              Faucet
+              <Faucet />
             </Button>
           </DialogTrigger>
           <DialogContent className="border-0 bg-secondary text-center sm:max-w-md">

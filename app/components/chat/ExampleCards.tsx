@@ -10,11 +10,11 @@ const TRADING_EXAMPLES: Example[] = [
   },
   {
     key: "buy-eth-limit",
-    content: "Buy ETH when price is below $2000",
+    content: "Buy 1 ETH when price is below $2000",
   },
   {
     key: "sell-eth-stop",
-    content: "Sell ETH when price drops below $2200",
+    content: "Sell 1 ETH when price drops below $2200",
   },
   {
     key: "buy-eth-twap",

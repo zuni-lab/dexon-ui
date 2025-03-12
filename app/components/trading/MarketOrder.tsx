@@ -70,17 +70,17 @@ export const MarketOrder: IComponent = () => {
       tokenBalance={tokenBalance || BigInt(0)}
       selectedToken={token}
       isConnected={isConnected}
-      renderFooter={() => (
-        <div className="mx-4 mt-4 rounded-xl bg-purple4/60 py-2 font-semibold text-lg">
-          <Button
-            variant="ghost"
-            className="group w-full justify-between text-white"
-          >
-            <span>Advanced Settings</span>
-            <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
-          </Button>
-        </div>
-      )}
+      // renderFooter={() => (
+      //   <div className="mx-4 mt-4 rounded-xl bg-purple4/60 py-2 font-semibold text-lg">
+      //     <Button
+      //       variant="ghost"
+      //       className="group w-full justify-between text-white"
+      //     >
+      //       <span>Advanced Settings</span>
+      //       <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+      //     </Button>
+      //   </div>
+      // )}
     >
       <StableCoinSection
         orderSide={orderSide}

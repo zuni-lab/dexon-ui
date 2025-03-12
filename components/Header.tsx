@@ -79,7 +79,7 @@ export default function Header() {
             </div>
           </DialogContent>
         </Dialog>
-        <TooltipProvider>
+        {/* <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -106,7 +106,7 @@ export default function Header() {
               </div>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
+        </TooltipProvider> */}
         <ConnectWallet />
       </div>
     </header>

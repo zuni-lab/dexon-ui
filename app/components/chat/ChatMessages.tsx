@@ -48,7 +48,6 @@ const BotMessage: IComponent<{ message: ChatMessage; isTyping?: boolean }> = ({
   );
 
   const renderContent = () => {
-    // Try to parse order details
     try {
       const orderDetails = parseOrderDetails(message.text);
       if (orderDetails) {

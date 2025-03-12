@@ -106,7 +106,7 @@ export function useMessageSending(
                         try {
                           if (!isValidJson(currentMessage)) {
                             console.debug("Normal message:", currentMessage);
-                            return;
+                            break;
                           }
                           const cleanedMessage =
                             cleanupJsonString(currentMessage);

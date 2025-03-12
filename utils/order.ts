@@ -1,20 +1,10 @@
 export const validateOrderDetails = (order: OrderDetails) => {
-  if (
-    !order.trigger_condition ||
-    !order.trigger_price ||
-    !order.token_name ||
-    !order.amount ||
-    !order.order_side
-  ) {
+  if (!order.token_name || !order.amount || !order.order_side) {
     throw new Error("Missing normal order required fields");
   }
 
   if (!["<", ">", "="].includes(order.trigger_condition)) {
     throw new Error("Invalid trigger condition");
-  }
-
-  if (!/^\d+(\.\d+)?$/.test(order.trigger_price)) {
-    throw new Error("Invalid trigger price");
   }
 
   if (!/^\d+(\.\d+)?$/.test(order.amount)) {
@@ -107,6 +97,11 @@ export function parseOrderDetails(jsonString: string): OrderDetails | null {
       validateTwapOrderDetails(order);
     } else {
       validateOrderDetails(order);
+      if (orderType === "STOP" || orderType === "LIMIT") {
+        if (!order.trigger_condition || !order.trigger_price) {
+          throw new Error("Missing trigger condition or trigger price");
+        }
+      }
     }
     return order;
   } catch (_e) {

@@ -18,7 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount } from "wagmi";
 
 export const orderTypeColors: Record<OrderType, string> = {
   STOP: "bg-[#EA322D]",
@@ -94,7 +94,10 @@ export const OrderPreview: IComponent<{
         </div>
         <div className="space-y-2">
           {orderType !== "TWAP" && (
-            <Item title="Price" value={formattedPrice} />
+            <Item
+              title="Price"
+              value={Number.isNaN(formattedPrice) ? formattedPrice : "-"}
+            />
           )}
           <Item
             title="Amount"

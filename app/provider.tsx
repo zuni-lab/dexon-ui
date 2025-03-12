@@ -35,7 +35,7 @@ const Providers = ({ children }: React.PropsWithChildren) => {
         chains: [monadTestnet],
         ssr: true,
         transports: {
-          [monadTestnet.id]: http(),
+          [monadTestnet.id]: http(ProjectENV.NEXT_PUBLIC_MONAD_TESTNET_RPC_URL),
         },
       }),
     [],

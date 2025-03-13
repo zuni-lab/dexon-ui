@@ -241,7 +241,7 @@ const Twap = ({ order, children }: OrderExecutionProps): React.JSX.Element => {
   const { address } = useAccount();
 
   const { placeTwapOrder, isPending } = usePlaceTwapOrder({
-    amount: order.amount,
+    amount: (Number(order.amount) * Number(order.total_orders || 0)).toString(),
     orderSide: order.order_side,
     selectedToken: Tokens[order.token_name.slice(1) as TokenKey],
     interval: order?.interval!,

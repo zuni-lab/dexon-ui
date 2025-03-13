@@ -93,12 +93,6 @@ export const OrderPreview: IComponent<{
           <span className="ml-auto font-medium">{order.token_name}</span>
         </div>
         <div className="space-y-2">
-          {orderType !== "TWAP" && (
-            <Item
-              title="Price"
-              value={Number.isNaN(formattedPrice) ? formattedPrice : "-"}
-            />
-          )}
           <Item
             title="Amount"
             value={`${formattedAmount} ${order.token_name}`}
